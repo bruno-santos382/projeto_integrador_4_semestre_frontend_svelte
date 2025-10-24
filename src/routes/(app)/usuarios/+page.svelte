@@ -1,7 +1,7 @@
 <script>
     import { toastState } from "$lib/state/toast.svelte";
     import { onMount } from "svelte";
-    import { Pagination, Toaster } from "$lib/components/ui";
+    import { Pagination, Toaster, Modal, Button, Input, PasswordInput } from "$lib/components/ui";
     import Toolbar from "$lib/components/usuarios/Toolbar.svelte";
     import { deserialize } from "$app/forms";
     import { fade } from "svelte/transition";
@@ -20,7 +20,13 @@
     let users = $state(data.users);
     let pagination = $state(data.pagination);
     let isLoading = $state(false);
-    
+
+    let userModalState = $state({
+        isOpen: false,
+        userId: null,
+        editing: false,
+    });
+
     let sortState = $state({
         key: "id",
         direction: "asc",
@@ -66,11 +72,24 @@
         }
     }
 
-    function editUser(id) {
-        console.log(id);
+    function handleSubmit(event) {
+        event.preventDefault();
+        console.log(event.target);
     }
 
-    function deleteUser(id) {
+    function handleAddUser() {
+        userModalState.isOpen = true;
+        userModalState.editing = false;
+        userModalState.userId = null;
+    }
+
+    function handleEditUser(id) {
+        userModalState.isOpen = true;
+        userModalState.editing = true;
+        userModalState.userId = id;
+    }
+
+    function handleDeleteUser(id) {
         console.log(id);
     }
 
@@ -124,7 +143,10 @@
                 const params = new FormData();
                 params.append("page", 0); // reset page to 0
                 params.append("size", pagination.itemsPerPage);
-                params.append("sort", `${sortState.key},${sortState.direction}`);
+                params.append(
+                    "sort",
+                    `${sortState.key},${sortState.direction}`,
+                );
                 params.append("nome", searchState.query || "");
                 params.append("email", searchState.query || "");
                 params.append("telefone", searchState.query || "");
@@ -162,7 +184,28 @@
 </script>
 
 <Toaster />
-<Toolbar onSearchInput={handleSearchInput} />
+
+<Modal
+    isOpen={userModalState.isOpen}
+    title={userModalState.editing ? "Editar Usuário" : "Adicionar Usuário"}
+    onClose={() => (userModalState.isOpen = false)}
+>
+    <form onsubmit={handleSubmit} method="post" action="?/save">
+        <Input label="Nome" required type="text" id="nome" name="nome" placeholder="Ex: João Silva" />
+        <Input label="CPF" required type="text" id="cpf" name="cpf" placeholder="Ex: 123.456.789-00" />
+        <Input label="Email" required type="email" id="email" name="email" placeholder="Ex: joao@email.com" />
+        <Input label="Telefone" required type="tel" id="telefone" name="telefone" placeholder="Ex: (11) 90000-0000" />
+        <PasswordInput label="Senha" required id="senha" name="senha" placeholder="Ex: ********" />
+        <PasswordInput label="Confirmar Senha" required id="senha_confirmacao" name="senha_confirmacao" placeholder="Ex: ********" />
+
+        <div class="modal-actions">
+            <Button type="button" variant="secondary" onclick={() => (userModalState.isOpen = false)}>Cancelar</Button>
+            <Button type="submit" variant="primary">Salvar</Button>
+        </div>
+    </form>
+</Modal>
+
+<Toolbar onSearchInput={handleSearchInput} onAddUser={handleAddUser} />
 
 <div class="content-wrapper">
     <!-- Table -->
@@ -171,11 +214,21 @@
             <thead>
                 <tr>
                     {#each columns as column, index (index)}
-                        <th class:sortable={column.sortable} onclick={(column.sortable) ? () => sort(column.key) : null}>
+                        <th
+                            class:sortable={column.sortable}
+                            onclick={column.sortable
+                                ? () => sort(column.key)
+                                : null}
+                        >
                             <span class="column-label">{column.label}</span>
                             {#if sortState.key === column.key}
                                 <span class="column-sort">
-                                    <i class="fas fa-lg fa-sort-{sortState.direction == 'asc' ? 'up' : 'down'}"></i>
+                                    <i
+                                        class="fas fa-lg fa-sort-{sortState.direction ==
+                                        'asc'
+                                            ? 'up'
+                                            : 'down'}"
+                                    ></i>
                                 </span>
                             {/if}
                         </th>
@@ -200,7 +253,7 @@
                                     <button
                                         title="Editar"
                                         class="btn-icon"
-                                        onclick={() => editUser(user.id)}
+                                        onclick={() => handleEditUser(user.id)}
                                         icon="edit"
                                         ><i class="fa-solid fa-pen-to-square"
                                         ></i></button
@@ -208,7 +261,8 @@
                                     <button
                                         title="Excluir"
                                         class="btn-icon delete"
-                                        onclick={() => deleteUser(user.id)}
+                                        onclick={() =>
+                                            handleDeleteUser(user.id)}
                                         icon="trash"
                                         ><i class="fa-solid fa-trash"
                                         ></i></button
@@ -250,6 +304,13 @@
 </div>
 
 <style>
+    
+    .modal-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 30px;
+    }
+
     .text-muted {
         color: #6c757d;
         text-decoration: italic;
@@ -331,7 +392,7 @@
         letter-spacing: 0.5px;
         text-align: center;
         user-select: none;
-        -webkit-user-select: none; /* Safari */        
+        -webkit-user-select: none; /* Safari */
         -moz-user-select: none; /* Firefox */
         -ms-user-select: none; /* IE10+/Edge */
         -o-user-select: none; /* Opera */
@@ -399,7 +460,7 @@
         justify-content: center;
     }
 
-   .btn-icon {
+    .btn-icon {
         padding: 8px;
         background: rgba(59, 130, 246, 0.1);
         border: 1px solid rgba(59, 130, 246, 0.3);

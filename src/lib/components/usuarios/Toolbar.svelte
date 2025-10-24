@@ -1,7 +1,7 @@
 <script>
     import Button from "../ui/Button.svelte";
 
-    const { onSearchInput } = $props();
+    const { onSearchInput, onAddUser } = $props();
 
     let searchInput = $state(null);
 
@@ -9,9 +9,6 @@
         console.log("toggleFilters");
     }
 
-    function addUser() {
-        console.log("addUser");
-    }
 
     function clearFilters() {
         console.log("clearFilters");
@@ -51,7 +48,7 @@
         <Button icon="filter" variant="secondary" onclick={toggleFilters}>
             Mais filtros
         </Button>
-        <Button icon="plus" variant="primary" onclick={addUser}>
+        <Button icon="plus" variant="primary" onclick={onAddUser}>
             Adicionar Usuário
         </Button>
 
@@ -168,6 +165,7 @@
         display: flex;
         gap: 10px;
         position: relative;
+        flex-basis: 400px;
     }
 
     /* Dropdown de Filtros */
