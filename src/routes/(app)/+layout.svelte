@@ -1,7 +1,8 @@
 <script>
     import { goto } from '$app/navigation';
-    import '../../app.css';
-    
+
+    import '$lib/assets/app.css';
+
     let { children } = $props();
 </script>
 
@@ -14,7 +15,7 @@
     
     <ul class="nav-menu">
       <li><a href="/dashboard">Dashboard</a></li>
-      <li><a href="/motoristas">Motoristas</a></li>
+      <li><a href="/usuarios">Usuários</a></li>
       <li><a href="/veiculos">Veículos</a></li>
       <li><a href="/manutencoes">Manutenções</a></li>
       <li><a href="/relatorios">Relatórios</a></li>
@@ -34,11 +35,6 @@
 </div>
 
 <style>
-
-  .layout {
-    min-height: 100vh;
-    background-color: #f5f5f5;
-  }
 
   nav {
     display: flex;

@@ -47,12 +47,15 @@ export const getSessionUser = async (cookies) => {
         // return user;
 
         return {
-            id: 1,
-            name: 'John Doe',
-            role: 'admin',
-            cpf: '12345678901',
-            email: 'john.doe@example.com',
-            telefone: '12345678901'
+            user: {
+                id: 1,
+                name: 'John Doe',
+                role: 'admin',
+                cpf: '12345678901',
+                email: 'john.doe@example.com',
+                telefone: '12345678901'
+            },
+            token
         };
     } catch (err) {
         logger.error('Unable to retrieve session user from /user endpoint:', err);
