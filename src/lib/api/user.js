@@ -25,7 +25,7 @@ export const getUsers = async (authToken, params = {}) => {
         const data = await apiClient.get(url);
 
         return { 
-            users: data?.content?.map(user => ({
+            users: (data?.content || []).map(user => ({
                 id: user.id,
                 name: user.nome,
                 email: user.email,

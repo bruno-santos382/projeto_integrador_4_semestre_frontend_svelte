@@ -7,4 +7,3 @@ export { default as Toaster } from './Toaster.svelte';
 export { default as ButtonGroup } from './ButtonGroup.svelte';
 export { default as Card } from './Card.svelte';
 export { default as Modal } from './Modal.svelte';
-export { default as Pagination } from './Pagination.svelte';

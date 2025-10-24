@@ -1,25 +1,27 @@
 <script>
     import { toastState } from "$lib/state/toast.svelte";
     import { onMount } from "svelte";
-    import { Pagination, Toaster, Modal, Button, Input, PasswordInput } from "$lib/components/ui";
-    import Toolbar from "$lib/components/usuarios/Toolbar.svelte";
+    import {
+        Toaster,
+        Modal,
+        Button,
+        Input,
+        PasswordInput,
+    } from "$lib/components/ui";
     import { deserialize } from "$app/forms";
-    import { fade } from "svelte/transition";
+    import DataTable from "$lib/components/ui/table/DataTable.svelte";
+    import { logger } from "$lib/utils/logger";
 
     const { data } = $props();
 
     let columns = $state([
-        { key: "id", label: "#", sortable: true },
-        { key: "nome", label: "Nome", sortable: true },
-        { key: "cpf", label: "CPF", sortable: true },
-        { key: "email", label: "Email", sortable: true },
-        { key: "telefone", label: "Telefone", sortable: true },
+        { key: "id", label: "#" },
+        { key: "nome", label: "Nome" },
+        { key: "cpf", label: "CPF" },
+        { key: "email", label: "Email" },
+        { key: "telefone", label: "Telefone" },
         { key: "acoes", label: "Ações", sortable: false },
     ]);
-
-    let users = $state(data.users);
-    let pagination = $state(data.pagination);
-    let isLoading = $state(false);
 
     let userModalState = $state({
         isOpen: false,
@@ -27,154 +29,65 @@
         editing: false,
     });
 
-    let sortState = $state({
-        key: "id",
-        direction: "asc",
-    });
+    let abortController = null;
+    const fetchUsers = async ({ page, size, search, sort }) => {
+        abortController?.abort();
+        abortController = new AbortController();
 
-    let searchState = {
-        timeout: null,
-        controller: null,
-        query: null,
-    };
-
-    async function sort(key) {
-        isLoading = true;
-        sortState.key = key;
-        sortState.direction = sortState.direction === "asc" ? "desc" : "asc";
+        const params = new FormData();
+        params.append("page", page - 1);
+        params.append("size", size);
+        params.append("sort", `${sort.key},${sort.order}`);
+        params.append("nome", search || "");
+        params.append("email", search || "");
+        params.append("telefone", search || "");
+        params.append("cpf", search || "");
 
         try {
-            const params = new FormData();
-            params.append("page", pagination.currentPage);
-            params.append("size", 10);
-            params.append("sort", `${sortState.key},${sortState.direction}`);
-            params.append("nome", searchState.query || "");
-            params.append("email", searchState.query || "");
-            params.append("telefone", searchState.query || "");
-            params.append("cpf", searchState.query || "");
-
             const response = await fetch("?/search", {
                 method: "POST",
                 body: params,
             });
-
             const result = deserialize(await response.text());
-            if (result.type === "success") {
-                users = result.data.users;
-                pagination = result.data.pagination;
-            } else {
+
+            if (result.type !== "success") {
                 toastState.error(result.data.error);
+                return { items: [], total: 0 };
+            } else {
+                return {
+                    items: result.data.users,
+                    total: result.data.pagination.totalItems,
+                };
             }
         } catch (error) {
-            toastState.error(error.message);
-        } finally {
-            isLoading = false;
+            if (error.name !== "AbortError") {
+                logger.error(error);
+                toastState.error("Erro ao buscar usuários");
+            }
+            return { items: [], total: 0 };
         }
-    }
+    };
 
-    function handleSubmit(event) {
+    const handleSubmit = (event) => {
         event.preventDefault();
         console.log(event.target);
-    }
+    };
 
-    function handleAddUser() {
+    const handleAddUser = () => {
         userModalState.isOpen = true;
         userModalState.editing = false;
         userModalState.userId = null;
-    }
+    };
 
-    function handleEditUser(id) {
+    const handleEditUser = (id) => {
         userModalState.isOpen = true;
         userModalState.editing = true;
         userModalState.userId = id;
-    }
+    };
 
-    function handleDeleteUser(id) {
+    const handleDeleteUser = (id) => {
         console.log(id);
-    }
-
-    async function handlePageChange(page) {
-        isLoading = true;
-
-        try {
-            const params = new FormData();
-            params.append("page", page);
-            params.append("size", 10);
-            params.append("sort", `${sortState.key},${sortState.direction}`);
-            params.append("nome", searchState.query || "");
-            params.append("email", searchState.query || "");
-            params.append("telefone", searchState.query || "");
-            params.append("cpf", searchState.query || "");
-
-            const response = await fetch("?/search", {
-                method: "POST",
-                body: params,
-            });
-
-            const result = deserialize(await response.text());
-            if (result.type === "success") {
-                users = result.data.users;
-                pagination = result.data.pagination;
-            } else {
-                toastState.error(result.data.error);
-            }
-        } catch (error) {
-            toastState.error(error.message);
-        } finally {
-            isLoading = false;
-        }
-    }
-
-    async function handleSearchInput(event) {
-        isLoading = true;
-
-        if (searchState.timeout) {
-            clearTimeout(searchState.timeout);
-            searchState.timeout = null;
-        }
-        if (searchState.controller) {
-            searchState.controller.abort();
-            searchState.controller = null;
-        }
-
-        searchState.query = event.target.value.trim();
-        searchState.timeout = setTimeout(async () => {
-            try {
-                const params = new FormData();
-                params.append("page", 0); // reset page to 0
-                params.append("size", pagination.itemsPerPage);
-                params.append(
-                    "sort",
-                    `${sortState.key},${sortState.direction}`,
-                );
-                params.append("nome", searchState.query || "");
-                params.append("email", searchState.query || "");
-                params.append("telefone", searchState.query || "");
-                params.append("cpf", searchState.query || "");
-
-                searchState.controller = new AbortController();
-                const response = await fetch("?/search", {
-                    method: "POST",
-                    body: params,
-                    signal: searchState.controller.signal,
-                });
-                const result = deserialize(await response.text());
-
-                if (result.type === "success") {
-                    users = result.data.users;
-                    pagination = result.data.pagination;
-                } else {
-                    toastState.error(result.data.error);
-                }
-            } catch (error) {
-                if (error.name !== "AbortError") {
-                    toastState.error(error.message);
-                }
-            } finally {
-                isLoading = false;
-            }
-        }, 250);
-    }
+    };
 
     onMount(async () => {
         if (data.error) {
@@ -191,120 +104,102 @@
     onClose={() => (userModalState.isOpen = false)}
 >
     <form onsubmit={handleSubmit} method="post" action="?/save">
-        <Input label="Nome" required type="text" id="nome" name="nome" placeholder="Ex: João Silva" />
-        <Input label="CPF" required type="text" id="cpf" name="cpf" placeholder="Ex: 123.456.789-00" />
-        <Input label="Email" required type="email" id="email" name="email" placeholder="Ex: joao@email.com" />
-        <Input label="Telefone" required type="tel" id="telefone" name="telefone" placeholder="Ex: (11) 90000-0000" />
-        <PasswordInput label="Senha" required id="senha" name="senha" placeholder="Ex: ********" />
-        <PasswordInput label="Confirmar Senha" required id="senha_confirmacao" name="senha_confirmacao" placeholder="Ex: ********" />
+        <Input
+            label="Nome"
+            required
+            type="text"
+            id="nome"
+            name="nome"
+            placeholder="Ex: João Silva"
+        />
+        <Input
+            label="CPF"
+            required
+            type="text"
+            id="cpf"
+            name="cpf"
+            placeholder="Ex: 123.456.789-00"
+        />
+        <Input
+            label="Email"
+            required
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Ex: joao@email.com"
+        />
+        <Input
+            label="Telefone"
+            required
+            type="tel"
+            id="telefone"
+            name="telefone"
+            placeholder="Ex: (11) 90000-0000"
+        />
+        <PasswordInput
+            label="Senha"
+            required
+            id="senha"
+            name="senha"
+            placeholder="Ex: ********"
+        />
+        <PasswordInput
+            label="Confirmar Senha"
+            required
+            id="senha_confirmacao"
+            name="senha_confirmacao"
+            placeholder="Ex: ********"
+        />
 
         <div class="modal-actions">
-            <Button type="button" variant="secondary" onclick={() => (userModalState.isOpen = false)}>Cancelar</Button>
+            <Button
+                type="button"
+                variant="secondary"
+                onclick={() => (userModalState.isOpen = false)}>Cancelar</Button
+            >
             <Button type="submit" variant="primary">Salvar</Button>
         </div>
     </form>
 </Modal>
 
-<Toolbar onSearchInput={handleSearchInput} onAddUser={handleAddUser} />
-
-<div class="content-wrapper">
-    <!-- Table -->
-    <div class="table-container" class:loading={isLoading}>
-        <table>
-            <thead>
-                <tr>
-                    {#each columns as column, index (index)}
-                        <th
-                            class:sortable={column.sortable}
-                            onclick={column.sortable
-                                ? () => sort(column.key)
-                                : null}
-                        >
-                            <span class="column-label">{column.label}</span>
-                            {#if sortState.key === column.key}
-                                <span class="column-sort">
-                                    <i
-                                        class="fas fa-lg fa-sort-{sortState.direction ==
-                                        'asc'
-                                            ? 'up'
-                                            : 'down'}"
-                                    ></i>
-                                </span>
-                            {/if}
-                        </th>
-                    {/each}
-                </tr>
-            </thead>
-            <tbody>
-                {#each users as user, index (index)}
-                    <tr>
-                        <td>{user.id}</td>
-                        <td
-                            >{user.name}
-                            {#if user.id === data.session.user.id}
-                                <span class="text-muted">(Você)</span>{/if}</td
-                        >
-                        <td>{user.cpf}</td>
-                        <td>{user.email}</td>
-                        <td>{user.phone}</td>
-                        <td>
-                            {#if user.id !== data.session.user.id}
-                                <div class="action-btns">
-                                    <button
-                                        title="Editar"
-                                        class="btn-icon"
-                                        onclick={() => handleEditUser(user.id)}
-                                        icon="edit"
-                                        ><i class="fa-solid fa-pen-to-square"
-                                        ></i></button
-                                    >
-                                    <button
-                                        title="Excluir"
-                                        class="btn-icon delete"
-                                        onclick={() =>
-                                            handleDeleteUser(user.id)}
-                                        icon="trash"
-                                        ><i class="fa-solid fa-trash"
-                                        ></i></button
-                                    >
-                                </div>
-                            {/if}
-                        </td>
-                    </tr>
-                {/each}
-
-                {#if !users?.length}
-                    <tr>
-                        <td colspan="6" class="no-data"
-                            >Nenhum resultado encontrado.</td
-                        >
-                    </tr>
-                {/if}
-            </tbody>
-        </table>
-
-        <Pagination
-            totalItems={pagination.totalItems}
-            currentPage={pagination.currentPage}
-            itemsPerPage={pagination.itemsPerPage}
-            totalPages={pagination.totalPages}
-            onPageChange={handlePageChange}
-        />
-
-        {#if isLoading}
-            <div
-                class="loading-overlay"
-                in:fade={{ duration: 100 }}
-                out:fade={{ duration: 300 }}
-            >
-                <div class="spinner"></div>
-            </div>
+<DataTable
+    {columns}
+    initialData={{ items: data.users, total: data.pagination.totalItems }}
+    fetchItems={fetchUsers}
+    defaultSort={{ key: "id", order: "asc" }}
+    pageSize={10}
+>
+    {#snippet nome(user)}
+        {user.name}
+        {#if user.id === data.session.user.id}
+            <span class="text-muted">(Você)</span>
         {/if}
-    </div>
-</div>
+    {/snippet}
+
+    {#snippet acoes(user)}
+        <div class="actions">
+            <button
+                title="Editar"
+                class="btn-icon"
+                onclick={() => handleEditUser(user.id)}
+                icon="edit"
+            >
+                <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+
+            <button
+                title="Excluir"
+                class="btn-icon delete"
+                onclick={() => handleDeleteUser(user.id)}
+                icon="trash"
+            >
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </div>
+    {/snippet}
+</DataTable>
 
 <style>
-    
     .modal-actions {
         display: flex;
         gap: 12px;
@@ -314,150 +209,6 @@
     .text-muted {
         color: #6c757d;
         text-decoration: italic;
-    }
-
-    /* Table */
-    .table-container {
-        background: rgba(15, 23, 42, 0.6);
-        backdrop-filter: blur(10px);
-        border-radius: 15px;
-        overflow: hidden;
-        border: 1px solid rgba(59, 130, 246, 0.2);
-        overflow-x: auto;
-        position: relative;
-    }
-
-    .content-wrapper:has(.loading-overlay) {
-        pointer-events: none;
-    }
-    /* Loading overlay - simplified */
-    .loading-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(15, 23, 42, 0.2);
-        backdrop-filter: blur(2px);
-        border-radius: 15px;
-        z-index: 1000;
-    }
-
-    .spinner {
-        width: 40px;
-        height: 40px;
-        border: 2px solid rgba(59, 130, 246, 0.15);
-        border-top-color: rgba(59, 130, 246, 0.6);
-        border-radius: 50%;
-        animation: spin 1s ease-in-out infinite;
-    }
-
-    @keyframes spin {
-        to {
-            transform: rotate(360deg);
-        }
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        table-layout: fixed;
-    }
-
-    thead {
-        background: rgba(59, 130, 246, 0.1);
-    }
-
-    .column-sort {
-        position: absolute;
-        right: 10px;
-        opacity: 0.5;
-        transition: opacity 0.2s;
-    }
-
-    th:hover .column-sort {
-        opacity: 1;
-    }
-
-    th {
-        position: relative;
-        padding: 12px 14px;
-        text-align: left;
-        font-weight: 600;
-        color: #3b82f6;
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        text-align: center;
-        user-select: none;
-        -webkit-user-select: none; /* Safari */
-        -moz-user-select: none; /* Firefox */
-        -ms-user-select: none; /* IE10+/Edge */
-        -o-user-select: none; /* Opera */
-    }
-
-    th.sortable:hover {
-        cursor: pointer;
-        background: rgba(59, 130, 246, 0.1);
-    }
-
-    th:nth-child(1) {
-        width: 70px;
-    } /* # */
-    th:nth-child(2) {
-        width: auto;
-    } /* Nome */
-    th:nth-child(3) {
-        width: 150px;
-    } /* CPF */
-    th:nth-child(4) {
-        width: auto;
-    } /* Email */
-    th:nth-child(5) {
-        width: 180px;
-    } /* Telefone */
-    th:nth-child(6) {
-        width: 110px;
-    } /* Ações */
-
-    td {
-        padding: 12px 14px;
-        border-top: 1px solid rgba(59, 130, 246, 0.1);
-        color: #cbd5e1;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        text-align: center;
-    }
-
-    td.no-data {
-        color: #94a3b8;
-        padding: 20px;
-        font-style: italic;
-        font-size: 14px;
-        text-align: center;
-        opacity: 0.8;
-    }
-
-    tbody tr {
-        transition: all 0.3s;
-    }
-
-    tbody tr:hover {
-        background: rgba(59, 130, 246, 0.05);
-    }
-
-    /* Disable hover effect while loading */
-    .table-container.loading tbody tr:hover {
-        background: transparent;
-    }
-
-    .action-btns {
-        display: flex;
-        gap: 8px;
-        justify-content: center;
     }
 
     .btn-icon {
@@ -492,22 +243,5 @@
     .btn-icon.delete:hover {
         background: rgba(239, 68, 68, 0.2);
         transform: scale(1.1);
-    }
-
-    /* Responsivo */
-    @media (max-width: 768px) {
-        table {
-            font-size: 12px;
-        }
-
-        th,
-        td {
-            padding: 12px 10px;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-        }
     }
 </style>
