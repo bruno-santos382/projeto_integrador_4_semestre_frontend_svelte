@@ -1,7 +1,10 @@
 <script>
-    const { data } = $props();
+    import { slide } from 'svelte/transition';
+    import { enhance } from '$app/forms';
 
-    let cpf = $state(data.username);
+    const { data, form } = $props();
+
+    let cpf = $state(data.username || form?.cpf);
     let senha = $state('');
     let lembrarme = $state(false);
 
@@ -22,13 +25,6 @@
     function handleCPFInput(e) {
         cpf = formatCPF(e.target.value);
     }
-
-    function handleSubmit(event) {
-        event.preventDefault();
-        console.log('Login submitted:', { cpf, senha, lembrarme });
-        alert('Login realizado!\nCPF: ' + cpf);
-        // Aqui você adicionaria a lógica de autenticação
-    }
 </script>
 
 <div class="login-container">
@@ -36,12 +32,24 @@
         <div class="logo-section">
         </div>
 
-        <form onsubmit={handleSubmit}>
+        <form method="post" use:enhance>
+            {#if form?.error}
+                <div class="error-message" transition:slide>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <span>{form.error}</span>
+                </div>
+            {/if}
+
             <div class="form-group">
                 <label for="cpf">CPF</label>
                 <input
                     type="text"
                     id="cpf"
+                    name="cpf"
                     bind:value={cpf}
                     oninput={handleCPFInput}
                     placeholder="Informe seu cpf"
@@ -55,6 +63,7 @@
                 <input
                     type="password"
                     id="senha"
+                    name="senha"
                     bind:value={senha}
                     placeholder="Informe sua senha"
                     required
@@ -93,6 +102,7 @@
 </div>
 
 <style>
+  
     :global(body) {
         margin: 0;
         padding: 0;
@@ -484,6 +494,37 @@
         bottom: -80px;
         left: 20%;
         animation-delay: 5s;
+    }
+
+      /* NEW CSS - Error Message */
+    .error-message {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        background-color: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 4px;
+        color: #f87171;
+        font-size: 14px;
+        margin-bottom: 20px;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    .error-message svg {
+        flex-shrink: 0;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     @keyframes float-orb {
