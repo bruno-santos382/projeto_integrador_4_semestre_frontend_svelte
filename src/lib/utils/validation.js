@@ -304,3 +304,18 @@ export function validarSenha(senha) {
 
     return score;
 }
+
+
+/**
+ * Flattens zod validation errors to a single object.
+ * @param {z.ZodError} validation - The zod validation error.
+ * @returns {Object} - An object containing the flattened errors.
+ */
+export function getValidationErrors(validation) {
+    /** @type {Object.<string, string>} */
+    const errors = {};
+    for (const [key, messages] of Object.entries(validation.error.flatten().fieldErrors)) {
+        errors[key] = messages[0];
+    }
+    return errors;
+}

@@ -38,11 +38,12 @@ export class ApiClient {
                 if (response.status === 401) {
                     throw new ApiError('Usuário não autenticado', response.status);
                 }
+                
                 const errorData = await response.json().catch(() => null);
                 logger.error(`${method} ${url} - ${response.status}`, errorData);
-                
+
                 throw new ApiError(
-                    errorData?.message || `Erro HTTP ${response.status}`,
+                    errorData?.errors?.[0]?.defaultMessage || errorData?.message || `Erro HTTP ${response.status}`,
                     response.status,
                     errorData
                 );

@@ -27,9 +27,9 @@ export const getUsers = async (authToken, params = {}) => {
         return { 
             users: (data?.content || []).map(user => ({
                 id: user.id,
-                name: user.nome,
+                nome: user.nome,
                 email: user.email,
-                phone: user.telefone,
+                telefone: user.telefone,
                 cpf: user.cpf,
             })),
             pagination: {
@@ -44,6 +44,35 @@ export const getUsers = async (authToken, params = {}) => {
             return { error: error.message }
         }
         logger.error('Unable to fetch users:', error);
+        return { error: 'Erro interno do servidor' }
+    }
+}
+
+
+export const createUser = async (token, user) => {
+    try {
+        const apiClient = createApiClient(token);
+        const data = await apiClient.post('/usuarios', user);
+        return { user: data };
+    } catch (error) {
+        if (error instanceof ApiError) {
+            return { error: error.message }
+        }
+        logger.error('Unable to create user:', error);
+        return { error: 'Erro interno do servidor' }
+    }
+}
+
+export const updateUser = async (token, user) => {
+    try {
+        const apiClient = createApiClient(token);
+        const data = await apiClient.patch(`/usuarios/${user.id}`, user);
+        return { user: data };
+    } catch (error) {
+        if (error instanceof ApiError) {
+            return { error: error.message }
+        }
+        logger.error('Unable to update user:', error);
         return { error: 'Erro interno do servidor' }
     }
 }

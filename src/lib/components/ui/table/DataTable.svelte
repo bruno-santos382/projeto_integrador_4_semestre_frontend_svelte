@@ -2,91 +2,38 @@
     import { fade } from "svelte/transition";
 
     const {
-        initialData,
         columns,
-        fetchItems,
+        items = [],
+        isLoading = false,
+        totalItems = 0,
+        currentPage = 1,
         pagination = true,
         pageSize = 10,
         toolbar = null,
-        defaultSort = { key: null, order: "asc" },
+        onSort = () => {},
+        onSearch = () => {},
+        onPageChange = () => {},
         ...cellRenderers
     } = $props();
 
     import Grid from "./Grid.svelte";
     import Paginator from "./Paginator.svelte";
     import Toolbar from "./Toolbar.svelte";
-
-    let items = $state(initialData?.items || []);
-    let totalItems = $state(initialData?.total || 0);
-    let isLoading = $state(false);
-    let currentPage = $state(1);
-    let searchText = $state("");
-    let sortBy = $state(defaultSort);
-    let searchTimer = null;
-
-    const loadItems = async () => {
-        const result = await fetchItems?.({
-            page: currentPage,
-            size: pageSize,
-            search: searchText,
-            sort: sortBy,
-        });
-
-        if (result?.items instanceof Array) {
-            items = result.items;
-            totalItems = result.total;
-        }
-    };
-
-    const reloadData = async (delay = 0) => {
-        if (searchTimer) {
-            clearTimeout(searchTimer);
-            searchTimer = null;
-        }
-
-        isLoading = true;
-
-        if (delay > 0) {
-            searchTimer = setTimeout(async () => {
-                await loadItems();
-                isLoading = false;
-            }, delay);
-        } else {
-            await loadItems();
-            isLoading = false;
-        }
-    };
-
-    const handlePageChange = async (page) => {
-        currentPage = page;
-        reloadData();
-    };
-
-    const handleSort = (key, order) => {
-        sortBy = { key, order };
-        reloadData();
-    };
-
-    const handleSearch = async (search) => {
-        currentPage = 1;
-        searchText = search;
-        reloadData(250);
-    };
 </script>
 
-<Toolbar onSearch={handleSearch} {toolbar} />
+<Toolbar onSearch={onSearch} {toolbar} />
 
 <div class="content-wrapper">
     <!-- Table -->
     <div class="table-container" class:loading={isLoading}>
-        <Grid {columns} {items} {cellRenderers} onSort={handleSort} />
+        <Grid {columns} {items} {cellRenderers} {onSort} />
 
         {#if pagination}
             <Paginator
                 {totalItems}
                 {currentPage}
                 itemsPerPage={pageSize}
-                onPageChange={handlePageChange}
+                {onPageChange}
             />
         {/if}
 
