@@ -1,5 +1,16 @@
 import { logger } from '$lib/utils/logger';
 
+// Classe de erro customizada para encapsular status e dados de erro da API
+export class ApiError extends Error {
+    constructor(message, status, data) {
+        super(message);
+        this.name = 'ApiError';
+        this.status = status;
+        this.data = data;
+    }
+}
+
+
 // Classe para gerenciar chamadas HTTP de forma padronizada
 export class ApiClient {
     // Construtor: define a URL base e as opções padrão (Content-Type)
@@ -35,13 +46,6 @@ export class ApiClient {
             
             // Log: Resposta recebida
             logger.info(`API Response: ${method} ${url} - Status ${response.status}`);
-
-            // Redireciona para a página de login em caso de acesso não autorizado (401)
-            if (response.status === 401) {
-                // Log: Erro 401
-                logger.error(`API Error (Unauthorized): ${method} ${url} - Status 401`);
-                throw new Error('Unauthorized');
-            }
 
             // Lança um erro customizado para outros status HTTP de erro
             if (!response.ok) {
@@ -127,12 +131,14 @@ export class ApiClient {
     }
 }
 
-// Classe de erro customizada para encapsular status e dados de erro da API
-export class ApiError extends Error {
-    constructor(message, status, data) {
-        super(message);
-        this.name = 'ApiError';
-        this.status = status;
-        this.data = data;
+export const createApiClient = (token = null) => {
+    const baseURL = import.meta.env.VITE_API_BASE_URL;
+    if (!baseURL) {
+        throw new Error('VITE_API_BASE_URL environment variable is not set or empty.');
     }
+    const client = new ApiClient(baseURL);
+    if (token) {
+        client.setAuthToken(token);
+    }
+    return client;
 }
