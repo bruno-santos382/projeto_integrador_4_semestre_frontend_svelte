@@ -43,8 +43,7 @@
 		display: flex;
 		align-items: center;
 		gap: 16px;
-		min-width: 320px;
-		max-width: 450px;
+		width: 350px;
 		z-index: 3000;
 		box-shadow: 
 			0 4px 6px rgba(0, 0, 0, 0.1),

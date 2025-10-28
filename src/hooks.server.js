@@ -1,8 +1,9 @@
-import { getSessionUser } from "$lib/api/auth";
+import { authService } from "$lib/api/auth";
 
 /** @type {import('@sveltejs/kit').Handle} */
 export async function handle({ event, resolve }) {
-  const session = await getSessionUser(event.cookies);
+  const service = authService(event.cookies);
+  const session = await service.getSessionUser();
 
   // Redireciona usuário autenticado tentando acessar login
   if (

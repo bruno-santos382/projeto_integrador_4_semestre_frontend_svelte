@@ -1,87 +1,87 @@
+<!-- UserForm.svelte -->
 <script>
-    import { applyAction, enhance } from "$app/forms";
-    import { page } from "$app/stores";
-    
-    // UI Component Imports
-    import { Modal, Button, Input, PasswordInput } from "$lib/components/ui";
+    import { enhance } from "$app/forms";
+    import { Input, PasswordInput, Button } from "$lib/components/layout";
+    import { onDestroy } from "svelte";
 
-    // --- PROPS ---
-    // Props are non-reactive (read-only) inputs for the component.
-    const { 
-        user, 
-        isOpen, 
-        isEditMode, 
-        onClose, 
-        onSaveSuccess, 
-        onSaveError 
-    } = $props();
+    const { user, isEditMode, onCancel, onSaveSuccess, onSaveError } = $props();
 
-    // --- STATE (Runes) ---
-    // Reactive state for managing UI feedback and conditional fields.
     let isSubmitting = $state(false); 
     let showPasswordFields = $state(false);
+    let errors = $state(null);
+    let formActions = $state(null);
 
-    // Derived state: Gets the server-side validation errors from SvelteKit.
-    const formErrors = $derived($page.form?.errors);
-
-    // --- HANDLERS ---
+    const currentYear = new Date().getFullYear();
+    const maxDate = `${currentYear - 1}-12-31`;
+    const minDate = `${currentYear - 150}-01-01`;
     
-    // Toggles visibility of the optional password change fields.
+    let formData = $state({
+        nome: user?.nome ?? '',
+        cpf: user?.cpf ?? '',
+        email: user?.email ?? '',
+        telefone: user?.telefone ?? '',
+        dataNascimento: user?.dataNascimento ?? '',
+        senha: '',
+        senhaConfirmacao: ''
+    });
+
+
     const togglePasswordFields = () => {
         showPasswordFields = !showPasswordFields;
     };
 
-    // --- EFFECTS ---
-
-    // Resets password field visibility and clears form errors when the modal is closed.
+    // Scroll to first error
     $effect(() => {
-        if (!isOpen) {
-            showPasswordFields = false;
-            $page.form = null;
+        if (!errors) return;
+        const firstErrorField = ['nome', 'cpf', 'email', 'telefone', 'senha', 'senhaConfirmacao']
+            .find(field => errors[field]);
+        if (firstErrorField) {
+            document.getElementById(firstErrorField)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     });
 
 
-    // --- FORM ENHANCEMENT ---
-
-    // Handles form submission lifecycle with SvelteKit's `enhance`.
-    const handleSubmit = () => {
-        // 1. Set submitting state immediately.
+    const handleSubmit = async () => {
         isSubmitting = true;
-        
+
+        await new Promise((resolve) => setTimeout(resolve, 250));
+
         return async ({ result, update }) => {
-            // Small delay for ux
-            await new Promise((resolve) => setTimeout(resolve, 250));
-            
-            // 2. Update the page to display new data or validation errors.
             await update();
 
-            // 3. Process the result based on type and status
-            if (result.type === "success") {
-                onSaveSuccess?.(result.data);
-            } else if (result.type === "failure" || result.type === "error") {
-                // Handle server errors (500, etc.) or validation failures
-                onSaveError?.(result.data);
-            }
-            // Note: 400 validation errors are handled by update() and displayed via formErrors
-            
-            // 4. Reset submitting state.
             isSubmitting = false;
+            errors = result.data.errors;
+
+            if (result.type === 'success') {
+                onSaveSuccess(result.data);
+            } else if (result?.data?.error) {
+                onSaveError(result.data.error);
+            }
         };
     };
+
+    onDestroy(() => {
+        errors = null;
+        formData = {
+            nome: '',
+            cpf: '',
+            email: '',
+            telefone: '',
+            senha: '',
+            dataNascimento: '',
+            senhaConfirmacao: ''
+        };
+    })
 </script>
 
-<Modal
-    title={isEditMode ? "Editar Usuário" : "Adicionar Usuário"}
-    {isOpen}
-    {onClose}
->
+{#key errors}
     <form
         class="user-form"
         method="post"
         action="?/save"
         use:enhance={handleSubmit}
         novalidate
+        autocomplete="off"
     >
         {#if user?.id}
             <input type="hidden" name="id" value={user.id} />
@@ -95,8 +95,8 @@
                 id="nome"
                 name="nome"
                 placeholder="Ex: João Silva"
-                value={user?.nome}
-                error={formErrors?.nome}
+                bind:value={formData.nome}
+                error={errors?.nome}
             />
             <Input
                 label="CPF"
@@ -105,8 +105,9 @@
                 id="cpf"
                 name="cpf"
                 placeholder="Ex: 123.456.789-00"
-                value={user?.cpf}
-                error={formErrors?.cpf}
+                mask="###.###.###-##"
+                bind:value={formData.cpf}
+                error={errors?.cpf}
             />
             <Input
                 label="Email"
@@ -115,8 +116,8 @@
                 id="email"
                 name="email"
                 placeholder="Ex: joao@email.com"
-                value={user?.email}
-                error={formErrors?.email}
+                bind:value={formData.email}
+                error={errors?.email}
             />
             <Input
                 label="Telefone"
@@ -125,8 +126,22 @@
                 id="telefone"
                 name="telefone"
                 placeholder="Ex: (11) 90000-0000"
-                value={user?.telefone}
-                error={formErrors?.telefone}
+                mask="(##) #####-####"
+                bind:value={formData.telefone}
+                error={errors?.telefone}
+            />
+
+            <Input
+                label="Data de Nascimento"
+                required
+                type="date"
+                id="dataNascimento"
+                name="dataNascimento"
+                placeholder="Ex: 01/01/2000"
+                min={minDate}
+                max={maxDate}
+                bind:value={formData.dataNascimento}
+                error={errors?.dataNascimento}
             />
         </div>
 
@@ -155,19 +170,21 @@
                     <PasswordInput
                         label="Senha"
                         required={!isEditMode}
+                        autocomplete="new-password"
                         id="senha"
                         name="senha"
                         placeholder="Mínimo 8 caracteres"
                         showStrength={true}
-                        error={formErrors?.senha}
+                        error={errors?.senha}
                     />
                     <PasswordInput
                         label="Confirmar Senha"
                         required={!isEditMode}
+                        autocomplete="new-password"
                         id="senhaConfirmacao"
                         name="senhaConfirmacao"
                         placeholder="Repita a senha"
-                        error={formErrors?.senhaConfirmacao}
+                        error={errors?.senhaConfirmacao}
                     />
                     {#if isEditMode}
                         <Button
@@ -183,8 +200,8 @@
             {/if}
         </div>
 
-        <div class="modal-actions">
-            <Button type="button" variant="secondary" onclick={onClose}>
+        <div class="form-actions button-group" bind:this={formActions}>
+            <Button type="button" variant="secondary" onclick={onCancel}>
                 Cancelar
             </Button>
             <Button type="submit" variant="primary" loading={isSubmitting}>
@@ -192,9 +209,14 @@
             </Button>
         </div>
     </form>
-</Modal>
+{/key}
 
 <style>
+    .form-actions {
+        display: flex;
+        gap: 8px;
+    }
+    
     .user-form {
         display: flex;
         flex-direction: column;
@@ -252,7 +274,7 @@
         color: #93c5fd;
     }
 
-    .modal-actions {
+    .form-actions {
         display: flex;
         justify-content: flex-end;
         gap: 12px;
@@ -262,11 +284,11 @@
     }
 
     @media (max-width: 640px) {
-        .modal-actions {
-            flex-direction: column-reverse;
+        .form-actions {
+            flex-direction: column;
         }
 
-        .modal-actions :global(button) {
+        .form-actions :global(button) {
             width: 100%;
         }
 

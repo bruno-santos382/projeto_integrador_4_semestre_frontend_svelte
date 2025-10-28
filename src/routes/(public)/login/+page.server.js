@@ -1,6 +1,6 @@
 import { fail, redirect } from "@sveltejs/kit";
 import { logger } from "$lib/utils/logger";
-import { login } from "$lib/api/auth";
+import { authService } from "$lib/api/auth";
 
 /** @type {import('./$types').PageLoad} */
 export function load({ url }) {
@@ -14,7 +14,7 @@ export const actions = {
     const cpf = data.get("cpf");
     const password = data.get("senha");
 
-    const result = await login(cookies, cpf, password);
+    const result = await authService(cookies).login(cpf, password);
 
     // Se o login falhar, retorna mensagem apropriada
     if (result?.error) {
@@ -28,6 +28,6 @@ export const actions = {
     }
 
     logger.info(`Usuário autenticado com sucesso: ${cpf}`);
-    throw redirect(303, "/dashboard");
+    return redirect(303, "/dashboard");
   },
 };

@@ -3,11 +3,12 @@
         items, 
         columns, 
         cellRenderers, 
+        currentSort = null,
         onSort = (_key, _order) => {},
     } = $props();
 
-    let sortOrder = $state("desc");
-    let sortKey = $state(null);
+    let sortOrder = $state(currentSort?.order || "desc");
+    let sortKey = $state(currentSort?.field || null);
     
     function sort(key) {
         sortKey = key;
@@ -23,6 +24,7 @@
                 <th 
                     class:sortable={column.sortable !== false} 
                     onclick={column.sortable !== false ? () => sort(column.key) : undefined}
+                    style:width={column.width || 'auto'}
                 >
                     <span class="column-label">{column.label}</span>
 
@@ -40,9 +42,10 @@
         {#each items as item, index (index)}
             <tr>
                 {#each columns as column (column.key)}
+                    {@const renderer = cellRenderers[`cell_${column.key}`]}
                     <td>
-                        {#if cellRenderers[column.key]}
-                            {@render cellRenderers[column.key](item)}
+                        {#if renderer}
+                            {@render renderer(item)}
                         {:else}
                             {item[column.key]}
                         {/if}
@@ -105,25 +108,6 @@
         cursor: pointer;
         background: rgba(59, 130, 246, 0.1);
     }
-
-    th:nth-child(1) {
-        width: 70px;
-    } /* # */
-    th:nth-child(2) {
-        width: auto;
-    } /* Nome */
-    th:nth-child(3) {
-        width: 150px;
-    } /* CPF */
-    th:nth-child(4) {
-        width: auto;
-    } /* Email */
-    th:nth-child(5) {
-        width: 180px;
-    } /* Telefone */
-    th:nth-child(6) {
-        width: 110px;
-    } /* Ações */
 
     td {
         padding: 12px 14px;

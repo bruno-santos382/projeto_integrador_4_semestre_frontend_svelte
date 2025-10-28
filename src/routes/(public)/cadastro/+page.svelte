@@ -6,8 +6,8 @@
   import { deserialize } from "$app/forms";
   import { logger } from "$lib/utils/logger";
 
-  import { StepProgress } from "$lib/components/registration";
-  import Toaster from "$lib/components/ui/Toaster.svelte";
+  import StepProgress from "$lib/components/StepProgress.svelte";
+  import Toaster from "$lib/components/layout/Toaster.svelte";
 
   import {
     PageHeader,
@@ -17,7 +17,7 @@
     FormRow,
     ButtonGroup,
     Button,
-  } from "$lib/components/ui";
+  } from "$lib/components/layout";
 
   import {
     validarCNPJ,
@@ -167,9 +167,9 @@
       if (result.type === "success") {
         toastState.success(
           "Cadastro concluído com sucesso! Você será redirecionado em instantes...",
-          3000,
+          2000,
         );
-        await new Promise((resolve) => setTimeout(resolve, 3000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
         goto(result.data.redirect);
       } else {
         toastState.error(result.error.message, 6000);

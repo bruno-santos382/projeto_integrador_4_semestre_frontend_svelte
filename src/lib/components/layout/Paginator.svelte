@@ -1,17 +1,20 @@
 <script>
     const { 
         totalItems = 100,
-        currentPage = 1,
+        currentPage = 0,  // 0-based page index
         itemsPerPage = 10,
         maxVisiblePages = 5,  // Maximum page buttons to show
         onPageChange = (_page) => {}
     } = $props();
 
     const totalPages = $derived(totalItems > 0 ? Math.ceil(totalItems / itemsPerPage) : 1);
-    const showingStart = $derived(totalItems > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0);
-    const showingEnd = $derived(totalItems > 0 ? Math.min(currentPage * itemsPerPage, totalItems) : 0);
+    const showingStart = $derived(totalItems > 0 ? currentPage * itemsPerPage + 1 : 0);
+    const showingEnd = $derived(totalItems > 0 ? Math.min((currentPage + 1) * itemsPerPage, totalItems) : 0);
+    
+    // Convert 0-based index to 1-based display page
+    const displayPage = $derived(currentPage + 1);
 
-    // Calculate which page numbers to show
+    // Calculate which page numbers to show (1-based for display)
     const visiblePages = $derived.by(() => {
         // If we have few pages, show them all
         if (totalPages <= maxVisiblePages) {
@@ -20,8 +23,8 @@
 
         // Center the current page when possible
         const sidePadding = Math.floor(maxVisiblePages / 2);
-        let startPage = currentPage - sidePadding;
-        let endPage = currentPage + sidePadding;
+        let startPage = displayPage - sidePadding;
+        let endPage = displayPage + sidePadding;
 
         // Don't go below page 1
         if (startPage < 1) {
@@ -43,14 +46,16 @@
     const showFirstPage = $derived(visiblePages[0] > 1);
     const showLastPage = $derived(visiblePages[visiblePages.length - 1] < totalPages);
 
-    function goToPage(page) {
-        if (page < 1 || page > totalPages) return;
-        onPageChange?.(page);
+    function goToPage(displayPageNumber) {
+        const pageIndex = displayPageNumber - 1; // Convert to 0-based
+        if (pageIndex < 0 || pageIndex >= totalPages) return;
+        onPageChange?.(pageIndex);
     }
 
     function changePage(direction) {
-        const newPage = direction === "prev" ? currentPage - 1 : currentPage + 1;
-        goToPage(newPage);
+        const newPageIndex = direction === "prev" ? currentPage - 1 : currentPage + 1;
+        if (newPageIndex < 0 || newPageIndex >= totalPages) return;
+        onPageChange?.(newPageIndex);
     }
 </script>
 
@@ -62,7 +67,7 @@
         <button
             aria-label="Anterior"
             class="page-btn"
-            disabled={currentPage === 1}
+            disabled={currentPage === 0}
             onclick={() => changePage("prev")}
         >
             <i class="fas fa-chevron-left"></i>
@@ -85,7 +90,7 @@
             <button
                 aria-label="Página {page}"
                 class="page-btn"
-                class:active={page === currentPage}
+                class:active={page === displayPage}
                 onclick={() => goToPage(page)}
             >
                 {page}
@@ -108,7 +113,7 @@
         <button
             aria-label="Próximo"
             class="page-btn"
-            disabled={currentPage === totalPages}
+            disabled={currentPage === totalPages - 1}
             onclick={() => changePage("next")}
         >
             <i class="fas fa-chevron-right"></i>

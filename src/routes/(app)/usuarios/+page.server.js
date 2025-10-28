@@ -1,16 +1,18 @@
-import { getUsers, createUser, updateUser } from "$lib/api/user";
+import { userService } from "$lib/api/users";
 import { fail } from "@sveltejs/kit";
-import { UpsertUsuarioSchema } from "$lib/schema/usuario";
+import { UpsertUserSchema } from "$lib/schemas/user";
 import { getValidationErrors } from "$lib/utils/validation";
 
 /** @type {import('./$types').PageLoad} */
 export async function load({ locals }) {
-  const result = await getUsers(locals.token);
+  const service = userService(locals.token);
+  const result = await service.getUsers();
   return {
     users: result.users || [],
     pagination: result.pagination || {},
     error: result.error || null,
     session: { user: locals.user },
+    title: 'Gerenciamento de Usuários',
   };
 }
 
@@ -18,17 +20,19 @@ export async function load({ locals }) {
 export const actions = {
   search: async ({ request, locals }) => {
     const data = await request.formData();
+    const searchQuery = data.get("search")?.trim() || "";
     const params = {
       page: data.get("page"),
       size: data.get("size"),
       sort: data.get("sort"),
-      nome: data.get("nome"),
-      email: data.get("email"),
-      telefone: data.get("telefone"),
-      cpf: data.get("cpf"),
+      nome: searchQuery,
+      email: searchQuery,
+      telefone: searchQuery,
+      cpf: searchQuery,
     };
 
-    const result = await getUsers(locals.token, params);
+    const service = userService(locals.token);
+    const result = await service.getUsers(params);
     return result.error
       ? fail(500, { error: result.error })
       : { users: result.users, pagination: result.pagination };
@@ -37,17 +41,28 @@ export const actions = {
   save: async ({ request, locals }) => {
     const user = Object.fromEntries(await request.formData());
 
-    const validation = UpsertUsuarioSchema.safeParse(user);
+    const validation = UpsertUserSchema.safeParse(user);
     if (!validation.success) {
       return fail(400, { errors: getValidationErrors(validation) });
     }
 
+    const service = userService(locals.token);
     const result = user.id
-      ? await updateUser(locals.token, user)
-      : await createUser(locals.token, user);
+      ? await service.updateUser(user)
+      : await service.createUser(user);
 
     return result.error
       ? fail(500, { error: result.error })
       : { user: result.user };
+  },
+
+  delete: async ({ request, locals }) => {
+    const data = await request.formData();
+    const id = data.get("id");
+    const service = userService(locals.token);
+    const result = await service.deleteUser(id);
+    return result.error
+      ? fail(500, { error: result.error })
+      : { success: true };
   },
 };

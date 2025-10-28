@@ -9,6 +9,7 @@
         currentPage = 1,
         pagination = true,
         pageSize = 10,
+        currentSort = null,
         toolbar = null,
         onSort = (_key, _order) => {},
         onSearch = (_value) => {},
@@ -26,7 +27,7 @@
 <div class="content-wrapper">
     <!-- Table -->
     <div class="table-container" class:loading={isLoading}>
-        <Grid {columns} {items} {cellRenderers} {onSort} />
+        <Grid {columns} {items} {currentSort} {cellRenderers} {onSort} />
 
         {#if pagination}
             <Paginator

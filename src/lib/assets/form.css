@@ -111,3 +111,10 @@
   color: #ef4444;
   margin-top: 3px;
 }
+
+
+/* Força estilo consistente para date inputs */
+.form-group input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+  cursor: pointer;
+}

@@ -6,7 +6,8 @@
     loading = false,
     icon,
     onclick,
-    children 
+    children,
+    ...props
   } = $props();
 </script>
 
@@ -16,6 +17,7 @@
   disabled={disabled || loading}
   class="btn btn-{variant}"
   class:loading
+  {...props}
 >
   {#if loading}
     <i class="fas fa-spinner fa-spin"></i>

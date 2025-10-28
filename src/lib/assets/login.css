@@ -103,6 +103,23 @@ input[type="password"]:focus {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #1a3250 inset !important;
+  -webkit-text-fill-color: white !important;
+  border-color: #2d5a8a !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+input:disabled:-webkit-autofill,
+input:disabled:-webkit-autofill:hover,
+input:disabled:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 30px #0e1a2f inset !important;
+  -webkit-text-fill-color: #6b7f9f !important;
+}
+
 .options {
   display: flex;
   justify-content: space-between;

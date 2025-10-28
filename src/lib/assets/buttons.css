@@ -10,12 +10,15 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  flex: 1;
 }
 
 .btn-primary {
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: white;
+}
+
+.button-group .btn {
+    flex: 1;
 }
 
 .btn-primary:hover {

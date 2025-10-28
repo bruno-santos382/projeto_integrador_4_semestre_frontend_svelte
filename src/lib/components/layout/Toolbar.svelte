@@ -55,7 +55,7 @@
       display: flex;
       gap: 10px;
       position: relative;
-      flex-basis: 400px;
+      flex-basis: auto;
   }
 
   .search-box {

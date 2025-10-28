@@ -62,6 +62,7 @@
     
     <div class="input-wrapper">
       <input
+        {id}
         bind:value
         class:error
         class:with-copy={copyable}
