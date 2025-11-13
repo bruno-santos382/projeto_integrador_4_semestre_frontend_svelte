@@ -205,6 +205,43 @@ input[type="checkbox"] {
   transform: translateY(0);
 }
 
+/* Loading State */
+.btn-login.loading {
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.btn-login.loading::before {
+  display: none;
+}
+
+.btn-login.loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin-left: -8px;
+  margin-top: -8px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Optional: Hide button text while loading */
+.btn-login.loading {
+  color: transparent;
+}
+
 footer {
   margin-top: 40px;
   text-align: center;
@@ -441,23 +478,10 @@ footer {
   color: #f87171;
   font-size: 14px;
   margin-bottom: 20px;
-  animation: slideDown 0.3s ease-out;
 }
 
 .error-message svg {
   flex-shrink: 0;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 @keyframes float-orb {

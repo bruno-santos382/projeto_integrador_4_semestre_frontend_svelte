@@ -36,11 +36,11 @@ export const authService = (cookies) => {
       if (!token) return null;
 
       try {
-        const user = await createApiClient(token).get("/auth/usuario");
-        if (!user?.id) {
+        const result = await createApiClient(token).get("/usuarios/me");
+        if (!result?.user?.id) {
           throw Error("User data missing or invalid.");
         }
-        return { user, token };
+        return { user: result.user, token };
       } catch (err) {
         logger.error("Unable to retrieve session user:", err);
         return null;

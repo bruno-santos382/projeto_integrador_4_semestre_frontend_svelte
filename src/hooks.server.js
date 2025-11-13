@@ -22,7 +22,7 @@ export async function handle({ event, resolve }) {
   if (event.route.id?.startsWith("/(app)") && !session?.user) {
     return new Response(null, {
       status: 302,
-      headers: { Location: "/login" },
+      headers: { Location: `/login?reason=session_expired&timestamp=${Date.now()}` },
     });
   }
 

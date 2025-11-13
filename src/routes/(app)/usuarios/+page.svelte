@@ -9,6 +9,7 @@ import { deserialize } from "$app/forms";
   import Modal from "$lib/components/layout/Modal.svelte";
   import DataTable from "$lib/components/layout/DataTable.svelte";
   import Button from "$lib/components/layout/Button.svelte";
+  import PlanLimitIndicator from "$lib/components/PlanLimitIndicator.svelte";
 
   // Keep this store — it’s doing heavy lifting
   import { createDataTableStore } from "$lib/stores/dataTable.svelte.js";
@@ -19,8 +20,10 @@ import { deserialize } from "$app/forms";
       endpoint: "?/search",
       columns: [
         { key: "id", label: "ID", width: '70px' },
+        { key: "funcao", label: "Função", width: '100px', sortable: false },
         { key: "nome", label: "Nome" },
         { key: "cpf", label: "CPF", width: '150px' },
+        { key: "cnh", label: "CNH", width: '230px' },
         { key: "email", label: "Email" },
         { key: "telefone", label: "Telefone", width: '200px' },
         { key: "acoes", label: "Ações", width: '100px', sortable: false },
@@ -35,6 +38,8 @@ import { deserialize } from "$app/forms";
 
   const currentUser = $state(data?.session?.user);
   const cpfMask = new Mask({ mask: "###.###.###-##" });
+  const limitReached = $derived(usersTable.state.totalItems >= 5);
+  const isAdmin = $derived(currentUser?.role === "ADMIN");
 
   // === Helpers ===
   const canEditOrDelete = (user) => user?.id !== currentUser?.id;
@@ -142,6 +147,14 @@ import { deserialize } from "$app/forms";
   </Modal>
 {/if}
 
+{#if isAdmin}
+  <PlanLimitIndicator 
+    limit={5} 
+    used={usersTable.state.totalItems} 
+    message="usuários registrados" 
+  />
+{/if}
+
 <DataTable
   columns={usersTable.columns}
   items={usersTable.state.items}
@@ -167,22 +180,42 @@ import { deserialize } from "$app/forms";
   }}
 >
   {#snippet toolbar()}
+  {#if currentUser?.role === "ADMIN" && !limitReached}
     <Button variant="primary" icon="plus" onclick={handleCreate}>
       Novo Usuário
     </Button>
+  {/if}
   {/snippet}
 
   {#snippet cell_cpf(user)} {cpfMask.masked(user.cpf)} {/snippet}
+
+  {#snippet cell_funcao(user)}
+    {#if user.motorista}
+      Motorista
+    {:else}
+      Admin
+    {/if}
+  {/snippet}
 
   {#snippet cell_nome(user)}
     {user.nome}
     {#if user.id === currentUser?.id}
       <span class="badge badge-warning">(Você)</span>
+    {:else if user.motorista}
+    {/if}
+  {/snippet}
+
+  {#snippet cell_cnh(user)}
+    {#if user.motorista}
+      {user.motorista?.numeroCnh} 
+      <span class="badge badge-primary">(Tipo: {user.motorista?.tipoCnh})</span>
+    {:else}
+      &mdash;
     {/if}
   {/snippet}
 
   {#snippet cell_acoes(user)}
-    {#if canEditOrDelete(user)}
+    {#if canEditOrDelete(user) && isAdmin}
       <div class="btn-group">
         <button aria-label="Editar" class="btn-icon" onclick={() => handleEdit(user)}>
           <i class="fas fa-edit"></i>
@@ -191,6 +224,8 @@ import { deserialize } from "$app/forms";
           <i class="fas fa-trash"></i>
         </button>
       </div>
+    {:else}
+      &mdash;
     {/if}
   {/snippet}
 </DataTable>
@@ -223,5 +258,9 @@ import { deserialize } from "$app/forms";
 
   .btn-icon.delete:hover {
     background: rgba(239, 68, 68, 0.1);
+  }
+
+  .text-muted {
+    color: #86898b;
   }
 </style>

@@ -1,24 +1,23 @@
 <script>
-    import { slide } from 'svelte/transition';
-    import { enhance } from '$app/forms';
+    import { slide } from "svelte/transition";
+    import { enhance } from "$app/forms";
 
     const { data, form } = $props();
 
     let cpf = $state(data.username || form?.cpf);
-    let senha = $state('');
+    let senha = $state("");
     let lembrarme = $state(false);
+    let isLoading = $state(false);
+    let errorMessage = $state(form?.error || data?.error);
+    let errorKey = $state(0); // Add counter for unique keys
 
     function formatCPF(value) {
-        // Remove tudo que não é número
-        value = value.replace(/\D/g, '');
-        
-        // Adiciona a formatação
+        value = value.replace(/\D/g, "");
         if (value.length <= 11) {
-            value = value.replace(/(\d{3})(\d)/, '$1.$2');
-            value = value.replace(/(\d{3})(\d)/, '$1.$2');
-            value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            value = value.replace(/(\d{3})(\d)/, "$1.$2");
+            value = value.replace(/(\d{3})(\d)/, "$1.$2");
+            value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
         }
-        
         return value;
     }
 
@@ -28,24 +27,65 @@
 </script>
 
 <svelte:head>
-    <link rel="stylesheet" href="/login.css">
+    <link rel="stylesheet" href="/login.css" />
 </svelte:head>
 
 <div class="login-container">
     <div class="login-card">
-        <div class="logo-section">
-        </div>
+        <div class="logo-section"></div>
 
-        <form method="post" use:enhance>
+        <form
+            method="post"
+            use:enhance={async () => {
+                isLoading = true;
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                return async ({ update, result }) => {
+                    await update();
+                    isLoading = false;
+                    errorKey++; // Increment on each submission
+                };
+            }}
+        >
             {#if form?.error}
-                {#key form.error}
-                    <div class="error-message" transition:slide>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                {#key `${form?.error}-${errorKey}`}
+                    <div class="error-message" in:slide>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
                             <circle cx="12" cy="12" r="10"></circle>
                             <line x1="12" y1="8" x2="12" y2="12"></line>
                             <line x1="12" y1="16" x2="12.01" y2="16"></line>
                         </svg>
-                        <span>{form.error}</span>
+                        <span>{form?.error}</span>
+                    </div>
+                {/key}
+            {:else if data?.error}
+                {#key `${data.error}-${errorKey}`}
+                    <div class="error-message" in:slide>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <span>{data?.error}</span>
                     </div>
                 {/key}
             {/if}
@@ -84,12 +124,17 @@
                 <a href="/cadastro" class="forgot-password">Cadastre-se</a>
             </div>
 
-            <button type="submit" class="btn-login">ENTRAR</button>
+            <button
+                type="submit"
+                class="btn-login"
+                disabled={isLoading}
+                class:loading={isLoading}
+            >
+                ENTRAR
+            </button>
         </form>
 
-        <footer>
-            © Fev 2025 - Todos os direitos reservados.
-        </footer>
+        <footer>© Fev 2025 - Todos os direitos reservados.</footer>
     </div>
 
     <div class="animated-background">

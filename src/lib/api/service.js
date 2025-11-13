@@ -30,7 +30,7 @@ export class ApiService {
       const data = await this.apiClient.get(url);
 
       return {
-        items: (data?.content || []).map(this.mapper),
+        items: (data?.content || data || []).map(this.mapper),
         pagination: {
           currentPage: data?.pageable?.pageNumber || 0,
           itemsPerPage: data?.pageable?.pageSize || 10,
@@ -46,6 +46,9 @@ export class ApiService {
   }
 
   async create(payload) {
+    if (this.endpoint === "perfis-motorista") {
+      payload.usuarioId = payload.usuarioId || 0;
+    }
     try {
       const data = await this.apiClient.post(`/${this.endpoint}`, payload);
       return { item: data };
