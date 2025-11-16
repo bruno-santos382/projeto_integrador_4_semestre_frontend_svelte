@@ -54,10 +54,16 @@
             </tr>
         {/each}
 
-        {#if items.length === 0}
+        {#if items?.length == 0}
             <tr>
                 <td colspan="{columns.length}" class="no-data">
-                    Nenhum dado encontrado
+                    Nenhum registro encontrado
+                </td>
+            </tr>
+        {:else}
+            <tr>
+                <td colspan="{columns.length}" class="no-data">
+                    {items.length} registro(s) encontrado(s)
                 </td>
             </tr>
         {/if}

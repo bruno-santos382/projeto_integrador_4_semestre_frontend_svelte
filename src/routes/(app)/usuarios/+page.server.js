@@ -15,6 +15,8 @@ export async function load({ locals }) {
     motoristaSvc.getAll()
   ]);
 
+  console.log(userResult);
+  console.log(motoristaResult);
   const items = userResult.items?.map(user => ({
     ...user,
     motorista: motoristaResult.items?.find(m => m.usuarioId === user.id)

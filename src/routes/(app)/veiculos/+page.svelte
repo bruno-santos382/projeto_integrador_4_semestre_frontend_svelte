@@ -47,7 +47,6 @@
   };
 
   const getStatusBadge = (status) => {
-    console.log('status', status)
     const badges = {
       'ATIVO': 'badge-ativo',
       'INATIVO': 'badge-inativo',
