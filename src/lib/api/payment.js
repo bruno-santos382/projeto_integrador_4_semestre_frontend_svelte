@@ -2,7 +2,7 @@
 
 import { plans } from "$lib/data/plans";
 import { createApiClient } from "./client";
-import logger from "$lib/utils/logger";
+import { logger } from "$lib/utils/logger";
 
 export const paymentService = (cookies, token) => {
   return {
