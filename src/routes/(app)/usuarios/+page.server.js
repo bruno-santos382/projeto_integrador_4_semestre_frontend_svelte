@@ -15,8 +15,6 @@ export async function load({ locals }) {
     motoristaSvc.getAll(),
   ]);
 
-  console.log(userResult);
-  console.log(motoristaResult);
   const items =
     userResult.items?.map((user) => ({
       ...user,

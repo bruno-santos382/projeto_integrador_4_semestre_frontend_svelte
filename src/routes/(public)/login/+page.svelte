@@ -2,6 +2,7 @@
     import { slide } from "svelte/transition";
     import { enhance } from "$app/forms";
     import { resolve } from "$app/paths";
+    import CompanyLogo from "$lib/components/CompanyLogo.svelte";
 
     const { data, form } = $props();
 
@@ -32,16 +33,25 @@
 
 <div class="login-container">
     <div class="login-card">
-        <div class="logo-section"></div>
+        <div class="logo-section">
+            <CompanyLogo url="/" />
+        </div>
 
         <form
             method="post"
             use:enhance={async () => {
                 isLoading = true;
                 await new Promise((res) => setTimeout(res, 1000));
-                return async ({ update }) => {
-                    await update();
+                return async ({ update, result }) => {
                     isLoading = false;
+
+                    if (result.type === 'redirect') {
+                        window.location.href = data.redirect_url || result.location;
+                        return;
+                    }
+
+                    await update();
+
                     errorKey++; // Increment on each submission
                 };
             }}

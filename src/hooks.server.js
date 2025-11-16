@@ -1,4 +1,5 @@
 import { authService } from "$lib/api/auth";
+import { paymentService } from "$lib/api/payment";
 
 /** @type {import('@sveltejs/kit').Handle} */
 export async function handle({ event, resolve }) {
@@ -31,6 +32,16 @@ export async function handle({ event, resolve }) {
         status: 401,
       });
     }
+  }
+
+  // Read cookie instead of localStorage
+  if (event.route.id?.startsWith("/(app)") && event.request.method === "GET") {
+    const paymentStatus = await paymentService(
+      event.cookies,
+      event.locals.token,
+    ).getPaymentStatus();
+    event.locals.showProcessingPayment = paymentStatus?.showProcessingPayment;
+    event.locals.justActivatedPlan = paymentStatus?.justActivatedPlan;
   }
 
   // Anexa usuário em event.locals se autenticado

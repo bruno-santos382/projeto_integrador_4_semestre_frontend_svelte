@@ -1,4 +1,6 @@
 <script>
+    import { resolve } from '$app/paths';
+    
     let { limit, used, message = "usuários registrados" } = $props();
 
     // Calculate percentage
@@ -65,7 +67,7 @@
             </div>
         </div>
     </div>
-    <button class="upgrade-btn">Fazer Upgrade</button>
+    <a href={resolve('/planos')} class="upgrade-btn">Fazer Upgrade</a>
 </div>
 
 

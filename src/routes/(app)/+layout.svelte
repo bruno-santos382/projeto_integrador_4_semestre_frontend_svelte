@@ -1,22 +1,27 @@
 <script>
     import { page } from '$app/stores';
     import { resolve } from '$app/paths';
+
     import '$lib/assets/app.css';
 
+    import CompanyLogo from '$lib/components/CompanyLogo.svelte';
+    import ProcessingPayment from '$lib/components/layout/ProcessingPayment.svelte';
+    import PlanActivationNotice from '$lib/components/PlanActivationNotice.svelte';
+
     let { data, children } = $props();
+
+    let showProcessingPayment = $state(data?.showProcessingPayment);
+    let justActivatedPlan = $state(data?.justActivatedPlan);
     let currentPath = $derived($page.url.pathname);
     let title = $derived($page.data.title || currentPath.replace('/', ''));
-    let userName = $derived(data?.user?.nome);
+    let currentUser = $derived(data?.user);
 </script>
 
 <div class="layout">
   <nav>
     <div class="nav-content">
       <div class="nav-brand">
-        <div class="brand-icon">
-          <i class="fa-solid fa-truck-fast"></i>
-        </div>
-        <span class="brand-text">DriveFlow</span>
+        <CompanyLogo url="/dashboard" />
       </div>
       
       <ul class="nav-menu"> 
@@ -51,7 +56,7 @@
           <div class="user-avatar">
             <i class="fa-solid fa-user"></i>
           </div>
-          <span class="user-name">{userName}</span>
+          <span class="user-name">{currentUser?.nome}</span>
         </div>
         <form method="POST" action="/logout">
           <button type="submit" aria-label="Sair" class="btn-logout">
@@ -64,7 +69,17 @@
   </nav>
 
   <main>
+
+    
     <h1 class="page-title">{title || 'Sem Título'}</h1>
+    {#if showProcessingPayment === true}
+      <ProcessingPayment />
+    {/if}
+
+    {#if justActivatedPlan?.length}
+      <PlanActivationNotice justActivatedPlan={justActivatedPlan} />
+    {/if}
+
     {@render children()}
   </main>
 </div>

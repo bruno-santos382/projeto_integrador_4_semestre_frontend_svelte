@@ -30,11 +30,51 @@ body {
   z-index: 10;
 }
 
-.logo-section {
+a.logo-section {
+  text-decoration: none; /* remove underline */
+  color: inherit; /* inherit text color */
+  cursor: pointer; /* keep pointer cursor */
+  -webkit-tap-highlight-color: transparent; /* remove mobile highlight */
+
   display: flex;
   align-items: center;
-  gap: 15px;
-  margin-bottom: 40px;
+  gap: 0.875rem;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  color: #fff;
+}
+
+.logo-section:focus,
+.logo-section:active {
+  outline: none; /* remove focus ring */
+}
+
+.logo-icon {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.logo-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.logo-section h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+
+.logo-section:hover {
+  transform: translateY(-2px);
 }
 
 .logo {
