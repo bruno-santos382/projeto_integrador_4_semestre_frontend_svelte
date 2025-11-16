@@ -45,7 +45,7 @@ export class ApiClient {
         throw new ApiError(
           errorData?.errors?.[0]?.defaultMessage ||
             errorData?.message ||
-            `Erro HTTP ${response.status}`,
+            `Algo inesperado ocorreu. Tente novamente mais tarde.`,
           response.status,
           errorData,
         );
