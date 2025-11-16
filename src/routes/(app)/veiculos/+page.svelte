@@ -150,6 +150,8 @@
   >
     <VehicleForm
       vehicle={selectedVehicle}
+      tiposVeiculo={data.tiposVeiculo}
+      statusVeiculo={data.statusVeiculo}
       isEditMode={isEditMode}
       onCancel={() => isEditing = false}
       onSaveSuccess={handleSaveSuccess}

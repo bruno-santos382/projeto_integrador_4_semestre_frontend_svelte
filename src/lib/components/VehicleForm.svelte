@@ -4,7 +4,25 @@
     import { Input, Button } from "$lib/components/layout";
     import { onDestroy } from "svelte";
 
-    const { vehicle, isEditMode, onCancel, onSaveSuccess, onSaveError } = $props();
+    const {
+        vehicle,
+        isEditMode,
+        onCancel,
+        onSaveSuccess,
+        onSaveError,
+        tiposVeiculo = [
+            { value: 'carro', label: 'Carro' },
+            { value: 'moto', label: 'Moto' },
+            { value: 'caminhao', label: 'Caminhão' },
+            { value: 'van', label: 'Van' },
+            { value: 'onibus', label: 'Ônibus' }
+        ],
+        statusVeiculo = [
+            { value: 'ativo', label: 'Ativo' },
+            { value: 'inativo', label: 'Inativo' },
+            { value: 'manutencao', label: 'Manutenção' }
+        ]
+    } = $props();
 
     let isSubmitting = $state(false); 
     let errors = $state(null);
@@ -20,22 +38,8 @@
         marca: vehicle?.marca ?? '',
         kmAtual: vehicle?.kmAtual ?? 0,
         limiteAvisoKm: vehicle?.limiteAvisoKm ?? 1000,
-        status: vehicle?.status ?? 'ATIVO'
+        status: vehicle?.status ?? 'ativo'
     });
-
-    const tiposVeiculo = [
-        { value: 'CARRO', label: 'Carro' },
-        { value: 'MOTO', label: 'Moto' },
-        { value: 'CAMINHAO', label: 'Caminhão' },
-        { value: 'VAN', label: 'Van' },
-        { value: 'ONIBUS', label: 'Ônibus' }
-    ];
-
-    const statusOptions = [
-        { value: 'ATIVO', label: 'Ativo' },
-        { value: 'INATIVO', label: 'Inativo' },
-        { value: 'MANUTENCAO', label: 'Manutenção' }
-    ];
 
     // Scroll to first error
     $effect(() => {
@@ -185,8 +189,8 @@
                         class="form-select"
                         bind:value={formData.status}
                     >
-                        {#each statusOptions as status, index (index)}
-                            <option value={status.value}>{status.label}</option>
+                        {#each statusVeiculo as status, index (index)}
+                            <option  value={status.value}>{status.label}</option>
                         {/each}
                     </select>
                 </div>

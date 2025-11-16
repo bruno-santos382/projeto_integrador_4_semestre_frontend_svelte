@@ -6,13 +6,19 @@ import { getValidationErrors } from "$lib/utils/validation";
 /** @type {import('./$types').PageLoad} */
 export async function load({ locals }) {
   const service = vehicleService(locals.token);
-  const result = await service.getAll();
+  const [result, lookups] = await Promise.all([
+    service.getAll(),
+    service.getLookups()
+  ]);
+
   return {
     items: result.items || [],
     pagination: result.pagination || {},
     error: result.error || null,
     session: { user: locals.user },
     title: 'Gerenciamento de Veículos',
+    tiposVeiculo: lookups.items.tipos || [],
+    statusVeiculo: lookups.items.status || [],
   };
 }
 
