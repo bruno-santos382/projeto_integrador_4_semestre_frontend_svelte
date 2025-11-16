@@ -1,23 +1,53 @@
 <script lang="ts">
+    import { resolve } from '$app/paths';
+
     const { data } = $props();
 
     const dashboard = data.dashboard;
-    
+
     // Calculate percentages for limits
-    const veiculosPercent = $derived(Math.round((dashboard.limitesPlano.veiculosUsados / dashboard.limitesPlano.veiculosLimite) * 100));
-    const motoristasPercent = $derived(Math.round((dashboard.limitesPlano.motoristasUsados / dashboard.limitesPlano.motoristasLimite) * 100));
-    const usuariosPercent = $derived(Math.round((dashboard.limitesPlano.usuariosUsados / dashboard.limitesPlano.usuariosLimite) * 100));
+    const veiculosPercent = $derived(
+        Math.round(
+            (dashboard.limitesPlano.veiculosUsados /
+                dashboard.limitesPlano.veiculosLimite) *
+                100,
+        ),
+    );
+    const motoristasPercent = $derived(
+        Math.round(
+            (dashboard.limitesPlano.motoristasUsados /
+                dashboard.limitesPlano.motoristasLimite) *
+                100,
+        ),
+    );
+    const usuariosPercent = $derived(
+        Math.round(
+            (dashboard.limitesPlano.usuariosUsados /
+                dashboard.limitesPlano.usuariosLimite) *
+                100,
+        ),
+    );
 
     // Calculate max value for bar chart scaling
-    const maxCusto = $derived(Math.max(...dashboard.custosManutencaoUltimos6Meses.map(item => item.value), 1));
-    const hasManutencaoData = $derived(dashboard.custosManutencaoUltimos6Meses.some(item => item.value > 0));
+    const maxCusto = $derived(
+        Math.max(
+            ...dashboard.custosManutencaoUltimos6Meses.map(
+                (item) => item.value,
+            ),
+            1,
+        ),
+    );
+    const hasManutencaoData = $derived(
+        dashboard.custosManutencaoUltimos6Meses.some((item) => item.value > 0),
+    );
 
     // Calculate total for pie chart
-    const totalVeiculos = $derived(dashboard.frotaPorStatus.reduce((acc, item) => acc + item.value, 0));
+    const totalVeiculos = $derived(
+        dashboard.frotaPorStatus.reduce((acc, item) => acc + item.value, 0),
+    );
 
     const currentUser = $state(data?.session?.user);
     const isPaidPlan = $derived(currentUser?.plano === "PAGO");
-
 </script>
 
 <!-- KPI Cards -->
@@ -57,82 +87,130 @@
 
 <!-- Limits Section -->
 {#if !isPaidPlan}
-<div class="limit-section">
-    <h2>
-        <i class="fas fa-chart-line"></i>
-        Limites do Plano Gratuito
-    </h2>
-    <div class="limit-grid">
-        <div class="limit-item">
-            <div class="limit-header">
-                <span class="limit-label">Veículos</span>
-                <span class="limit-count">{dashboard.limitesPlano.veiculosUsados} de {dashboard.limitesPlano.veiculosLimite}</span>
+
+    <!-- Upgrade CTA -->
+    <div class="upgrade-cta">
+        <div class="upgrade-content">
+            <div class="upgrade-icon">
+                <i class="fas fa-rocket"></i>
             </div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: {veiculosPercent}%"></div>
+            <div class="upgrade-text">
+                <h3>Aumente o potencial da sua frota</h3>
+                <p>
+                    Remova todos os limites e tenha acesso ilimitado a veículos,
+                    motoristas e usuários.
+                </p>
             </div>
         </div>
+        <a href="{resolve('/planos')}" data-sveltekit-reload class="upgrade-button">
+            <span>Upgrade para Plano Pago</span>
+            <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+    
+    <div class="limit-section">
+        <h2>
+            <i class="fas fa-chart-line"></i>
+            Limites do Plano Gratuito
+        </h2>
+        <div class="limit-grid">
+            <div class="limit-item">
+                <div class="limit-header">
+                    <span class="limit-label">Veículos</span>
+                    <span class="limit-count"
+                        >{dashboard.limitesPlano.veiculosUsados} de {dashboard
+                            .limitesPlano.veiculosLimite}</span
+                    >
+                </div>
+                <div class="progress-bar">
+                    <div
+                        class="progress-fill"
+                        style="width: {veiculosPercent}%"
+                    ></div>
+                </div>
+            </div>
 
-        <div class="limit-item">
-            <div class="limit-header">
-                <span class="limit-label">Motoristas</span>
-                <span class="limit-count">{dashboard.limitesPlano.motoristasUsados} de {dashboard.limitesPlano.motoristasLimite}</span>
+            <div class="limit-item">
+                <div class="limit-header">
+                    <span class="limit-label">Motoristas</span>
+                    <span class="limit-count"
+                        >{dashboard.limitesPlano.motoristasUsados} de {dashboard
+                            .limitesPlano.motoristasLimite}</span
+                    >
+                </div>
+                <div class="progress-bar">
+                    <div
+                        class="progress-fill"
+                        style="width: {motoristasPercent}%"
+                    ></div>
+                </div>
             </div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: {motoristasPercent}%"></div>
-            </div>
-        </div>
 
-        <div class="limit-item">
-            <div class="limit-header">
-                <span class="limit-label">Usuários</span>
-                <span class="limit-count">{dashboard.limitesPlano.usuariosUsados} de {dashboard.limitesPlano.usuariosLimite}</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: {usuariosPercent}%"></div>
+            <div class="limit-item">
+                <div class="limit-header">
+                    <span class="limit-label">Usuários</span>
+                    <span class="limit-count"
+                        >{dashboard.limitesPlano.usuariosUsados} de {dashboard
+                            .limitesPlano.usuariosLimite}</span
+                    >
+                </div>
+                <div class="progress-bar">
+                    <div
+                        class="progress-fill"
+                        style="width: {usuariosPercent}%"
+                    ></div>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
 {:else}
-  
-<div class="limit-section unlimited-plan">
-    <h2>
-        <i class="fas fa-infinity"></i>
-        Plano Ilimitado
-    </h2>
-    <div class="limit-grid">
-        <div class="limit-item unlimited-item">
-            <div class="limit-header">
-                <span class="limit-label">Veículos</span>
-                <span class="limit-count unlimited-badge">{dashboard.limitesPlano.veiculosUsados} <span class="infinity-symbol">∞</span></span>
+    <div class="limit-section unlimited-plan">
+        <h2>
+            <i class="fas fa-infinity"></i>
+            Plano Ilimitado
+        </h2>
+        <div class="limit-grid">
+            <div class="limit-item unlimited-item">
+                <div class="limit-header">
+                    <span class="limit-label">Veículos</span>
+                    <span class="limit-count unlimited-badge"
+                        >{dashboard.limitesPlano.veiculosUsados}
+                        <span class="infinity-symbol">∞</span></span
+                    >
+                </div>
+                <div class="progress-bar unlimited-bar">
+                    <div class="progress-fill unlimited-fill"></div>
+                </div>
             </div>
-            <div class="progress-bar unlimited-bar">
-                <div class="progress-fill unlimited-fill"></div>
-            </div>
-        </div>
 
-        <div class="limit-item unlimited-item">
-            <div class="limit-header">
-                <span class="limit-label">Motoristas</span>
-                <span class="limit-count unlimited-badge">{dashboard.limitesPlano.motoristasUsados} <span class="infinity-symbol">∞</span></span>
+            <div class="limit-item unlimited-item">
+                <div class="limit-header">
+                    <span class="limit-label">Motoristas</span>
+                    <span class="limit-count unlimited-badge"
+                        >{dashboard.limitesPlano.motoristasUsados}
+                        <span class="infinity-symbol">∞</span></span
+                    >
+                </div>
+                <div class="progress-bar unlimited-bar">
+                    <div class="progress-fill unlimited-fill"></div>
+                </div>
             </div>
-            <div class="progress-bar unlimited-bar">
-                <div class="progress-fill unlimited-fill"></div>
-            </div>
-        </div>
 
-        <div class="limit-item unlimited-item">
-            <div class="limit-header">
-                <span class="limit-label">Usuários</span>
-                <span class="limit-count unlimited-badge">{dashboard.limitesPlano.usuariosUsados} <span class="infinity-symbol">∞</span></span>
-            </div>
-            <div class="progress-bar unlimited-bar">
-                <div class="progress-fill unlimited-fill"></div>
+            <div class="limit-item unlimited-item">
+                <div class="limit-header">
+                    <span class="limit-label">Usuários</span>
+                    <span class="limit-count unlimited-badge"
+                        >{dashboard.limitesPlano.usuariosUsados}
+                        <span class="infinity-symbol">∞</span></span
+                    >
+                </div>
+                <div class="progress-bar unlimited-bar">
+                    <div class="progress-fill unlimited-fill"></div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 {/if}
 
 <!-- Charts Section -->
@@ -144,44 +222,55 @@
             Frota por Status
         </h3>
         {#if dashboard.frotaPorStatus.length > 0}
-           <div class="pie-chart">
-    <div class="pie-circle">
-        <svg width="160" height="160" viewBox="0 0 160 160">
-            <circle class="bg-circle" cx="80" cy="80" r="70"></circle>
-            {#each dashboard.frotaPorStatus as status, index (index)}
-                {@const percent = (status.value / totalVeiculos) * 100}
-                {@const circumference = 440}
-                {@const previousPercent = dashboard.frotaPorStatus
-                    .slice(0, index)
-                    .reduce((sum, s) => sum + (s.value / totalVeiculos) * 100, 0)}
-                <circle 
-                    class="fill-circle" 
-                    cx="80" 
-                    cy="80" 
-                    r="70"
-                    style="
+            <div class="pie-chart">
+                <div class="pie-circle">
+                    <svg width="160" height="160" viewBox="0 0 160 160">
+                        <circle class="bg-circle" cx="80" cy="80" r="70"
+                        ></circle>
+                        {#each dashboard.frotaPorStatus as status, index (index)}
+                            {@const percent =
+                                (status.value / totalVeiculos) * 100}
+                            {@const circumference = 440}
+                            {@const previousPercent = dashboard.frotaPorStatus
+                                .slice(0, index)
+                                .reduce(
+                                    (sum, s) =>
+                                        sum + (s.value / totalVeiculos) * 100,
+                                    0,
+                                )}
+                            <circle
+                                class="fill-circle"
+                                cx="80"
+                                cy="80"
+                                r="70"
+                                style="
                         stroke: {status.fill}; 
-                        stroke-dasharray: {(circumference * percent / 100)} {circumference}; 
-                        stroke-dashoffset: {-circumference * previousPercent / 100}
+                        stroke-dasharray: {(circumference * percent) /
+                                    100} {circumference}; 
+                        stroke-dashoffset: {(-circumference * previousPercent) /
+                                    100}
                     "
-                ></circle>
-            {/each}
-        </svg>
-        <div class="pie-center-text">
-            <div class="value">{totalVeiculos}</div>
-            <div class="label">Veículos</div>
-        </div>
-    </div>
-    <div class="pie-legend">
-        {#each dashboard.frotaPorStatus as status, index (index)}
-            <div class="legend-item">
-                <div class="legend-color" style="background: {status.fill}"></div>
-                <span class="legend-label">{status.name}</span>
-                <span class="legend-value">{status.value}</span>
+                            ></circle>
+                        {/each}
+                    </svg>
+                    <div class="pie-center-text">
+                        <div class="value">{totalVeiculos}</div>
+                        <div class="label">Veículos</div>
+                    </div>
+                </div>
+                <div class="pie-legend">
+                    {#each dashboard.frotaPorStatus as status, index (index)}
+                        <div class="legend-item">
+                            <div
+                                class="legend-color"
+                                style="background: {status.fill}"
+                            ></div>
+                            <span class="legend-label">{status.name}</span>
+                            <span class="legend-value">{status.value}</span>
+                        </div>
+                    {/each}
+                </div>
             </div>
-        {/each}
-    </div>
-</div>
         {:else}
             <div class="empty-state">
                 <i class="fas fa-car"></i>
@@ -199,9 +288,14 @@
         {#if hasManutencaoData}
             <div class="bar-chart">
                 {#each dashboard.custosManutencaoUltimos6Meses as mes, index (index)}
-                    {@const barHeight = mes.value > 0 ? (mes.value / maxCusto) * 180 : 4}
+                    {@const barHeight =
+                        mes.value > 0 ? (mes.value / maxCusto) * 180 : 4}
                     <div class="bar-item">
-                        <div class="bar" style="height: {barHeight}px" title="R$ {mes.value.toFixed(2)}"></div>
+                        <div
+                            class="bar"
+                            style="height: {barHeight}px"
+                            title="R$ {mes.value.toFixed(2)}"
+                        ></div>
                         <div class="bar-label">{mes.name}</div>
                     </div>
                 {/each}
@@ -235,7 +329,9 @@
                 <div class="alert-item">
                     <i class="fas fa-exclamation-triangle"></i>
                     <div class="alert-content">
-                        <div class="alert-title">{alerta.placa} - {alerta.numeroVeiculo}</div>
+                        <div class="alert-title">
+                            {alerta.placa} - {alerta.numeroVeiculo}
+                        </div>
                         <div class="alert-description">{alerta.mensagem}</div>
                     </div>
                 </div>
@@ -545,7 +641,8 @@
     }
 
     @keyframes shimmer {
-        0%, 100% {
+        0%,
+        100% {
             opacity: 0.6;
         }
         50% {
@@ -665,6 +762,136 @@
     .alert-description {
         font-size: 13px;
         color: #94a3b8;
+    }
+
+    /* Upgrade CTA */
+    .upgrade-cta {
+        background: linear-gradient(
+            135deg,
+            rgba(139, 92, 246, 0.15),
+            rgba(59, 130, 246, 0.15)
+        );
+        border: 2px solid rgba(139, 92, 246, 0.4);
+        border-radius: 12px;
+        padding: 32px;
+        margin-bottom: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .upgrade-cta::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(
+            circle,
+            rgba(139, 92, 246, 0.1) 0%,
+            transparent 70%
+        );
+        animation: pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%,
+        100% {
+            transform: scale(1);
+            opacity: 0.5;
+        }
+        50% {
+            transform: scale(1.1);
+            opacity: 0.8;
+        }
+    }
+
+    .upgrade-content {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex: 1;
+        position: relative;
+        z-index: 1;
+    }
+
+    .upgrade-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: #fff;
+        flex-shrink: 0;
+        box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+    }
+
+    .upgrade-text h3 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 8px;
+    }
+
+    .upgrade-text p {
+        font-size: 14px;
+        color: #cbd5e1;
+        margin: 0;
+    }
+
+    .upgrade-button {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 32px;
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
+        white-space: nowrap;
+        box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
+    }
+
+    .upgrade-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(139, 92, 246, 0.5);
+        background: linear-gradient(135deg, #9333ea, #8b5cf6);
+    }
+
+    .upgrade-button i {
+        transition: transform 0.3s ease;
+    }
+
+    .upgrade-button:hover i {
+        transform: translateX(4px);
+    }
+
+    @media (max-width: 768px) {
+        .upgrade-cta {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .upgrade-content {
+            flex-direction: column;
+        }
+
+        .upgrade-button {
+            width: 100%;
+            justify-content: center;
+        }
     }
 
     @media (max-width: 768px) {

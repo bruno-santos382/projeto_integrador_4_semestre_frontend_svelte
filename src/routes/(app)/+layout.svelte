@@ -1,5 +1,4 @@
 <script>
-    import { goto } from '$app/navigation';
     import { page } from '$app/stores';
     import { resolve } from '$app/paths';
     import '$lib/assets/app.css';

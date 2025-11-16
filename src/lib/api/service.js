@@ -65,7 +65,7 @@ export class ApiService {
       return { error: "Erro interno do servidor" };
     }
   }
-  
+
   async create(payload) {
     if (this.endpoint === "perfis-motorista") {
       payload.usuarioId = payload.usuarioId || 0;
@@ -82,7 +82,10 @@ export class ApiService {
 
   async update(payload) {
     try {
-      const data = await this.apiClient.patch(`/${this.endpoint}/${payload.id}`, payload);
+      const data = await this.apiClient.patch(
+        `/${this.endpoint}/${payload.id}`,
+        payload,
+      );
       return { item: data };
     } catch (error) {
       if (error instanceof ApiError) return { error: error.message };

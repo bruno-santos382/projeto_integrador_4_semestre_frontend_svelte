@@ -1,6 +1,7 @@
 <script>
     import { slide } from "svelte/transition";
     import { enhance } from "$app/forms";
+    import { resolve } from "$app/paths";
 
     const { data, form } = $props();
 
@@ -8,7 +9,6 @@
     let senha = $state("");
     let lembrarme = $state(false);
     let isLoading = $state(false);
-    let errorMessage = $state(form?.error || data?.error);
     let errorKey = $state(0); // Add counter for unique keys
 
     function formatCPF(value) {
@@ -38,8 +38,8 @@
             method="post"
             use:enhance={async () => {
                 isLoading = true;
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-                return async ({ update, result }) => {
+                await new Promise((res) => setTimeout(res, 1000));
+                return async ({ update }) => {
                     await update();
                     isLoading = false;
                     errorKey++; // Increment on each submission
@@ -121,7 +121,7 @@
                     <input type="checkbox" bind:checked={lembrarme} />
                     <span>Lembrar-me</span>
                 </label>
-                <a href="/cadastro" class="forgot-password">Cadastre-se</a>
+                <a href={resolve('/cadastro')} class="forgot-password">Cadastre-se</a>
             </div>
 
             <button

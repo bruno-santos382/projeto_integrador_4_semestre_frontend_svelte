@@ -12,4 +12,4 @@ const mapper = (user) => ({
 
 export const userService = (token) => {
   return new ApiService(token, "usuarios", mapper);
-}
+};

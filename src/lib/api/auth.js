@@ -8,15 +8,19 @@ export const authService = (cookies) => {
     login: async (cpf, senha) => {
       try {
         const credentials = btoa(`${cpf.replace(/\D/g, "")}:${senha}`);
-        const token = await createApiClient().post("/authenticate", {}, {
-          headers: { Authorization: `Basic ${credentials}` }
-        });
+        const token = await createApiClient().post(
+          "/authenticate",
+          {},
+          {
+            headers: { Authorization: `Basic ${credentials}` },
+          },
+        );
 
         cookies.set("session_token", token, {
           path: "/",
           httpOnly: true,
           secure: true,
-          sameSite: "lax"
+          sameSite: "lax",
         });
 
         return { success: true };
@@ -45,6 +49,6 @@ export const authService = (cookies) => {
         logger.error("Unable to retrieve session user:", err);
         return null;
       }
-    }
+    },
   };
 };

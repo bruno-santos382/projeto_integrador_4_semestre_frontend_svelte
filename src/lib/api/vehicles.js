@@ -15,4 +15,4 @@ const mapper = (vehicle) => ({
 
 export const vehicleService = (token) => {
   return new ApiService(token, "veiculos", mapper);
-}
+};

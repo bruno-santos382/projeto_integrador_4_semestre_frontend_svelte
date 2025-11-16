@@ -8,7 +8,7 @@ const mapper = (maintenance) => ({
   custo: maintenance.custo,
   tipoManutencao: maintenance.tipoManutencao,
   veiculoId: maintenance.veiculoId,
-  placaVeiculo: maintenance.placaVeiculo
+  placaVeiculo: maintenance.placaVeiculo,
 });
 
 export const maintenanceService = (token) => {

@@ -8,7 +8,7 @@ export async function load({ locals }) {
   const service = vehicleService(locals.token);
   const [result, lookups] = await Promise.all([
     service.getAll(),
-    service.getLookups()
+    service.getLookups(),
   ]);
 
   return {
@@ -16,7 +16,7 @@ export async function load({ locals }) {
     pagination: result.pagination || {},
     error: result.error || null,
     session: { user: locals.user },
-    title: 'Gerenciamento de Veículos',
+    title: "Gerenciamento de Veículos",
     tiposVeiculo: lookups.items.tipos || [],
     statusVeiculo: lookups.items.status || [],
   };
@@ -37,7 +37,7 @@ export const actions = {
       anoFabricacao: searchQuery,
       kmAtual: searchQuery,
       limiteAvisoKm: searchQuery,
-      status: searchQuery
+      status: searchQuery,
     };
 
     const service = vehicleService(locals.token);

@@ -10,19 +10,21 @@ export async function handle({ event, resolve }) {
     event.url.pathname.startsWith("/login") ||
     event.url.pathname.startsWith("/cadastro")
   ) {
-  if (session?.user && event.request.method === "GET") {
+    if (session?.user && event.request.method === "GET") {
       return new Response(null, {
         status: 302,
         headers: { Location: "/dashboard" },
       });
     }
-  } 
+  }
   // Redireciona usuário não autenticado tentando acessar rotas protegidas
   if (event.route.id?.startsWith("/(app)") && !session?.user) {
     if (event.request.method === "GET") {
       return new Response(null, {
         status: 302,
-        headers: { Location: `/login?reason=session_expired&timestamp=${Date.now()}` },
+        headers: {
+          Location: `/login?reason=session_expired&timestamp=${Date.now()}`,
+        },
       });
     } else {
       return new Response(null, {
@@ -30,7 +32,6 @@ export async function handle({ event, resolve }) {
       });
     }
   }
-
 
   // Anexa usuário em event.locals se autenticado
   event.locals.user = session?.user;

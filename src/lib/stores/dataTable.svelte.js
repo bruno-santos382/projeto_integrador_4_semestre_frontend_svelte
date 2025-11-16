@@ -12,7 +12,7 @@ import { debounceAsync } from "$lib/utils/debounce.js";
  */
 export function createDataTableStore(config) {
   const columns = config.columns;
-  const endpoint = config.endpoint ?? '?/search';
+  const endpoint = config.endpoint ?? "?/search";
   const defaultSortField = config.defaultSortField ?? "id";
   const defaultSortOrder = config.defaultSortOrder ?? "asc";
   const defaultPageSize = config.defaultPageSize ?? 10;
@@ -44,8 +44,8 @@ export function createDataTableStore(config) {
       formData.append("size", state.pageSize);
       formData.append("search", state.search);
       formData.append("sort", `${state.sorting.field},${state.sorting.order}`);
-      
-     for (const [key, value] of Object.entries(state.filters)) {
+
+      for (const [key, value] of Object.entries(state.filters)) {
         if (String(value)?.trim()) {
           formData.append(`filters[${key}]`, value);
         }
@@ -57,17 +57,18 @@ export function createDataTableStore(config) {
         signal: fetchAbortController.signal,
       });
 
-        if (response.redirected) {
-          window.location.href = response.url;
-          return;
-        }
+      if (response.redirected) {
+        window.location.href = response.url;
+        return;
+      }
 
       const result = deserialize(await response.text());
 
       if (result.type === "success") {
         state.items = result.data.items ?? [];
         state.totalItems = result.data.pagination?.totalItems ?? 0;
-        state.currentPage = result.data.pagination?.currentPage ?? state.currentPage;
+        state.currentPage =
+          result.data.pagination?.currentPage ?? state.currentPage;
         state.pageSize = result.data.pagination?.itemsPerPage ?? state.pageSize;
 
         return { success: true, message: "Dados carregados com sucesso." };
@@ -120,7 +121,13 @@ export function createDataTableStore(config) {
   }
 
   function initialize(initialData = {}) {
-    const { items, pagination = {}, search, filters = {}, sorting = {} } = initialData;
+    const {
+      items,
+      pagination = {},
+      search,
+      filters = {},
+      sorting = {},
+    } = initialData;
 
     state.items = items || [];
     state.totalItems = pagination.totalItems || 0;

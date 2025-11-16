@@ -6,11 +6,14 @@ import { authService } from "$lib/api/auth";
 export function load({ url }) {
   const reason = url.searchParams.get("reason");
   const timestamp = url.searchParams.get("timestamp");
-  return { 
+  return {
     username: url.searchParams.get("username"),
-    error:  reason === "session_expired" ? "Sua sessão expirou. Faça login novamente." : "",
-    timestamp
-   };
+    error:
+      reason === "session_expired"
+        ? "Sua sessão expirou. Faça login novamente."
+        : "",
+    timestamp,
+  };
 }
 
 /** @satisfies {import('./$types').Actions} */

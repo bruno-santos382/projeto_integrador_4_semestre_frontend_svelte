@@ -1,18 +1,21 @@
 import { maintenanceService } from "$lib/api/maintenance";
 import { vehicleService } from "$lib/api/vehicles";
 import { fail } from "@sveltejs/kit";
-import { MaintenanceSchema, mapFormDataToMaintenance } from "$lib/schemas/maintenance";
+import {
+  MaintenanceSchema,
+  mapFormDataToMaintenance,
+} from "$lib/schemas/maintenance";
 import { getValidationErrors } from "$lib/utils/validation";
 
 /** @type {import('./$types').PageLoad} */
 export async function load({ locals }) {
- const manutencaoApi = maintenanceService(locals.token);
- const veiculoApi = vehicleService(locals.token);
+  const manutencaoApi = maintenanceService(locals.token);
+  const veiculoApi = vehicleService(locals.token);
 
   const [result, lookups, vehicles] = await Promise.all([
-    manutencaoApi.getAll({ sort: 'dataManutencao,desc' }),
+    manutencaoApi.getAll({ sort: "dataManutencao,desc" }),
     manutencaoApi.getLookups(),
-    veiculoApi.getAll()
+    veiculoApi.getAll(),
   ]);
 
   return {
@@ -20,7 +23,7 @@ export async function load({ locals }) {
     pagination: result.pagination || {},
     error: result.error || null,
     session: { user: locals.user },
-    title: 'Gerenciamento de Manutenções',
+    title: "Gerenciamento de Manutenções",
     tipoManutencao: lookups.items.tipos || [],
     vehicles: vehicles.items || [],
   };
@@ -33,11 +36,11 @@ export const actions = {
     const searchQuery = data.get("search")?.trim() || "";
 
     const dateRegex = /^(?!^\d{4}\/\d{2}\/\d{2}$)/;
-    let dateFilter = '';
+    let dateFilter = "";
     if (dateRegex.test(searchQuery)) {
-      dateFilter = searchQuery.split('/').reverse().join('-');
+      dateFilter = searchQuery.split("/").reverse().join("-");
     }
-    
+
     const params = {
       page: data.get("page"),
       size: data.get("size"),
@@ -56,14 +59,13 @@ export const actions = {
       : { items: result.items, pagination: result.pagination };
   },
 
-
   save: async ({ request, locals }) => {
     const formData = await request.formData();
     const maintenanceData = Object.fromEntries(formData.entries());
-    
+
     // Convert form data to maintenance object
     const maintenance = mapFormDataToMaintenance(maintenanceData);
-    
+
     const validation = MaintenanceSchema.safeParse(maintenance);
     if (!validation.success) {
       return fail(400, { errors: getValidationErrors(validation) });
@@ -83,10 +85,10 @@ export const actions = {
     const data = await request.formData();
     const id = data.get("id");
     if (!id) return fail(400, { error: "ID da manutenção é obrigatório" });
-    
+
     const service = maintenanceService(locals.token);
     const result = await service.delete(id);
-    
+
     return result.error
       ? fail(500, { error: result.error })
       : { success: true };

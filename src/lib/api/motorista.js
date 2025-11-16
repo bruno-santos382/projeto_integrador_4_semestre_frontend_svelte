@@ -12,4 +12,4 @@ const mapper = (user) => ({
 
 export const motoristaService = (token) => {
   return new ApiService(token, "perfis-motorista", mapper);
-}
+};

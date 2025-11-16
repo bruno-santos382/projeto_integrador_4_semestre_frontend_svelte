@@ -9,25 +9,26 @@ import { getValidationErrors } from "$lib/utils/validation";
 export async function load({ locals }) {
   const userSvc = userService(locals.token);
   const motoristaSvc = motoristaService(locals.token);
-  
+
   const [userResult, motoristaResult] = await Promise.all([
     userSvc.getAll(),
-    motoristaSvc.getAll()
+    motoristaSvc.getAll(),
   ]);
 
   console.log(userResult);
   console.log(motoristaResult);
-  const items = userResult.items?.map(user => ({
-    ...user,
-    motorista: motoristaResult.items?.find(m => m.usuarioId === user.id)
-  })) || [];
+  const items =
+    userResult.items?.map((user) => ({
+      ...user,
+      motorista: motoristaResult.items?.find((m) => m.usuarioId === user.id),
+    })) || [];
 
   return {
     items,
     pagination: userResult.pagination || {},
     error: userResult.error || motoristaResult.error || null,
     session: { user: locals.user },
-    title: 'Gerenciamento de Usuários',
+    title: "Gerenciamento de Usuários",
   };
 }
 
@@ -61,7 +62,9 @@ const saveMotorista = async (formData, token) => {
   if (!userValidation.success || !motoristaValidation.success) {
     const combinedErrors = {
       ...(userValidation.success ? {} : getValidationErrors(userValidation)),
-      ...(motoristaValidation.success ? {} : getValidationErrors(motoristaValidation))
+      ...(motoristaValidation.success
+        ? {}
+        : getValidationErrors(motoristaValidation)),
     };
     return fail(400, { errors: combinedErrors });
   }
@@ -93,17 +96,13 @@ const saveMotorista = async (formData, token) => {
 const deleteAdmin = async (id, token) => {
   const service = userService(token);
   const result = await service.delete(id);
-  return result.error
-    ? fail(500, { error: result.error })
-    : { success: true };
+  return result.error ? fail(500, { error: result.error }) : { success: true };
 };
 
 const deleteMotorista = async (id, token) => {
   const service = userService(token);
   const result = await service.delete(id);
-  return result.error
-    ? fail(500, { error: result.error })
-    : { success: true };
+  return result.error ? fail(500, { error: result.error }) : { success: true };
 };
 
 /** @satisfies {import('./$types').Actions} */
@@ -122,7 +121,7 @@ export const actions = {
     };
     const [userResult, motoristaResult] = await Promise.all([
       userService(locals.token).getAll(params),
-      motoristaService(locals.token).getAll(params)
+      motoristaService(locals.token).getAll(params),
     ]);
 
     if (userResult.error) {
@@ -132,10 +131,11 @@ export const actions = {
       return fail(500, { error: motoristaResult.error });
     }
 
-    const items = userResult.items?.map(user => ({
-      ...user,
-      motorista: motoristaResult.items?.find(m => m.usuarioId === user.id)
-    })) || [];
+    const items =
+      userResult.items?.map((user) => ({
+        ...user,
+        motorista: motoristaResult.items?.find((m) => m.usuarioId === user.id),
+      })) || [];
 
     return { items, pagination: userResult.pagination };
   },
