@@ -34,15 +34,17 @@ export async function handle({ event, resolve }) {
     }
   }
 
-  // Read cookie instead of localStorage
-  if (event.route.id?.startsWith("/(app)") && event.request.method === "GET") {
+     // Read cookie instead of localStorage
+  if (session?.user && event.route.id?.startsWith("/(app)") && event.request.method === "GET") {
     const paymentStatus = await paymentService(
       event.cookies,
       event.locals.token,
-    ).getPaymentStatus();
+    ).getPaymentStatus(session.user);
+   
     event.locals.showProcessingPayment = paymentStatus?.showProcessingPayment;
     event.locals.justActivatedPlan = paymentStatus?.justActivatedPlan;
   }
+
 
   // Anexa usuário em event.locals se autenticado
   event.locals.user = session?.user;
