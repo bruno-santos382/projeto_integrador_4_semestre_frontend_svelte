@@ -2,6 +2,7 @@
     import { slide } from "svelte/transition";
     import { enhance } from "$app/forms";
     import { resolve } from "$app/paths";
+    import { maska } from "maska/svelte"
     import CompanyLogo from "$lib/components/CompanyLogo.svelte";
 
     const { data, form } = $props();
@@ -12,19 +13,6 @@
     let isLoading = $state(false);
     let errorKey = $state(0); // Add counter for unique keys
 
-    function formatCPF(value) {
-        value = value.replace(/\D/g, "");
-        if (value.length <= 11) {
-            value = value.replace(/(\d{3})(\d)/, "$1.$2");
-            value = value.replace(/(\d{3})(\d)/, "$1.$2");
-            value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-        }
-        return value;
-    }
-
-    function handleCPFInput(e) {
-        cpf = formatCPF(e.target.value);
-    }
 </script>
 
 <svelte:head>
@@ -107,7 +95,7 @@
                     id="cpf"
                     name="cpf"
                     bind:value={cpf}
-                    oninput={handleCPFInput}
+                    use:maska={{ mask: '###.###.###-##' }}
                     placeholder="Informe seu cpf"
                     maxlength="14"
                     required
