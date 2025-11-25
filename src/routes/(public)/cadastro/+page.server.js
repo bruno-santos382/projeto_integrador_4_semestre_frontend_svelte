@@ -27,7 +27,9 @@ export const actions = {
       });
     } catch (e) {
       if (e instanceof ApiError) {
-        return fail(e.status, { error: e.message });
+        return fail(e.status, {
+          error: e.status === 409 ? "Já existe um usuário vinculado a este CPF" : e.message,
+        });
       }
       logger.error(e);
       return fail(500, { error: "Erro interno do servidor" });
