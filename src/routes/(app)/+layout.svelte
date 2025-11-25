@@ -15,6 +15,7 @@
     let currentPath = $derived($page.url.pathname);
     let title = $derived($page.data.title || currentPath.replace('/', ''));
     let currentUser = $derived(data?.user);
+    let isAdmin = $derived(currentUser?.role === 'ADMIN');
 </script>
 
 <div class="layout">
@@ -72,12 +73,15 @@
 
     
     <h1 class="page-title">{title || 'Sem Título'}</h1>
-    {#if showProcessingPayment === true}
-      <ProcessingPayment />
-    {/if}
 
-    {#if justActivatedPlan?.length}
-      <PlanActivationNotice justActivatedPlan={justActivatedPlan} />
+    {#if isAdmin}
+      {#if showProcessingPayment === true}
+        <ProcessingPayment />
+      {/if}
+
+      {#if justActivatedPlan?.length}
+        <PlanActivationNotice justActivatedPlan={justActivatedPlan} />
+      {/if}
     {/if}
 
     {@render children()}

@@ -53,7 +53,7 @@ export const paymentService = (cookies, token) => {
         return { error: "Não foi possível gerar o pagamento via PIX." };
       }
 
-      // cookies.set('pendingPayment', result.paymentId, { path: '/' });
+      cookies.set('pendingPayment', result.paymentId, { path: '/' });
 
       return {
         amount: plan.price,
