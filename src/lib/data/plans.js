@@ -22,7 +22,7 @@ export const plans = {
     name: "Corporativo",
     subtitle: "(Avançado)",
     icon: "🚚",
-    price: 159.99,
+    price: 0.1,
     priceUnit: "/mês",
     description:
       "Para grandes frotas com foco em análise e performance avançada.",

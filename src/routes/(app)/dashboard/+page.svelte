@@ -8,21 +8,21 @@
     // Calculate percentages for limits
     const veiculosPercent = $derived(
         Math.round(
-            (dashboard.limitesPlano.veiculosUsados /
+            (dashboard.kpis.totalVeiculos /
                 dashboard.limitesPlano.veiculosLimite) *
                 100,
         ),
     );
     const motoristasPercent = $derived(
         Math.round(
-            (dashboard.limitesPlano.motoristasUsados /
+            (dashboard.kpis.totalMotoristas /
                 dashboard.limitesPlano.motoristasLimite) *
                 100,
         ),
     );
     const usuariosPercent = $derived(
         Math.round(
-            (dashboard.limitesPlano.usuariosUsados /
+            (dashboard.kpis.totalMotoristas /
                 dashboard.limitesPlano.usuariosLimite) *
                 100,
         ),
@@ -120,7 +120,7 @@
                 <div class="limit-header">
                     <span class="limit-label">Veículos</span>
                     <span class="limit-count"
-                        >{dashboard.limitesPlano.veiculosUsados} de {dashboard
+                        >{dashboard.kpis.totalVeiculos} de {dashboard
                             .limitesPlano.veiculosLimite}</span
                     >
                 </div>
@@ -136,7 +136,7 @@
                 <div class="limit-header">
                     <span class="limit-label">Motoristas</span>
                     <span class="limit-count"
-                        >{dashboard.limitesPlano.motoristasUsados} de {dashboard
+                        >{dashboard.kpis.totalMotoristas} de {dashboard
                             .limitesPlano.motoristasLimite}</span
                     >
                 </div>
@@ -152,7 +152,7 @@
                 <div class="limit-header">
                     <span class="limit-label">Usuários</span>
                     <span class="limit-count"
-                        >{dashboard.limitesPlano.usuariosUsados} de {dashboard
+                        >{dashboard.kpis.totalMotoristas} de {dashboard
                             .limitesPlano.usuariosLimite}</span
                     >
                 </div>
@@ -177,7 +177,7 @@
                 <div class="limit-header">
                     <span class="limit-label">Veículos</span>
                     <span class="limit-count unlimited-badge"
-                        >{dashboard.limitesPlano.veiculosUsados}
+                        >{dashboard.kpis.totalVeiculos}
                         <span class="infinity-symbol">∞</span></span
                     >
                 </div>
@@ -190,7 +190,7 @@
                 <div class="limit-header">
                     <span class="limit-label">Motoristas</span>
                     <span class="limit-count unlimited-badge"
-                        >{dashboard.limitesPlano.motoristasUsados}
+                        >{dashboard.kpis.totalMotoristas}
                         <span class="infinity-symbol">∞</span></span
                     >
                 </div>
@@ -203,7 +203,7 @@
                 <div class="limit-header">
                     <span class="limit-label">Usuários</span>
                     <span class="limit-count unlimited-badge"
-                        >{dashboard.limitesPlano.usuariosUsados}
+                        >{dashboard.kpis.totalMotoristas}
                         <span class="infinity-symbol">∞</span></span
                     >
                 </div>
