@@ -30,14 +30,14 @@
   let validationErrors = $state({});
 
   let registrationForm = $state({
-    razaoSocial: "Empresa Fake",
-    nomeFantasia: "Fake Inc.",
-    cnpj: "32512341000132",
-    nome: "Fake User",
-    email: "29281025078@mailinator.com",
-    cpf: "29281025078",
-    dataNascimento: "1990-01-01",
-    telefone: "(11) 90000-0000",
+    razaoSocial: "",
+    nomeFantasia: "",
+    cnpj: "",
+    nome: "",
+    email: "",
+    cpf: "",
+    dataNascimento: "",
+    telefone: "",
     senha: "",
     confirmarSenha: "",
   });

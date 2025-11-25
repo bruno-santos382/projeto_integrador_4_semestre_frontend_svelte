@@ -28,7 +28,9 @@ export const actions = {
     } catch (e) {
       if (e instanceof ApiError) {
         return fail(e.status, {
-          error: e.status === 409 ? "Já existe um usuário vinculado a este CPF" : e.message,
+          error: e.status === 409
+            ? "Este email, CPF ou CNPJ já está cadastrado no sistema."
+            : e.message,
         });
       }
       logger.error(e);
