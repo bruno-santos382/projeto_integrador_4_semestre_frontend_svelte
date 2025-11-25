@@ -48,6 +48,7 @@
 
     const currentUser = $state(data?.session?.user);
     const isPaidPlan = $derived(currentUser?.plano === "PAGO");
+    const isAdmin = $derived(currentUser?.role === "ADMIN");
 </script>
 
 <!-- KPI Cards -->
@@ -85,6 +86,7 @@
     </div>
 </div>
 
+{#if isAdmin}
 <!-- Limits Section -->
 {#if !isPaidPlan}
 
@@ -211,6 +213,7 @@
             </div>
         </div>
     </div>
+{/if}
 {/if}
 
 <!-- Charts Section -->
